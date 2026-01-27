@@ -1,0 +1,757 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================
+   SCOI.IO DARK THEME - Neon Cyber Style
+============================================ */
+
+@layer base {
+  :root {
+    /* ============================================
+       SCOI.IO THEME - Light Mode
+    ============================================ */
+    
+    /* Core Colors - Light Background */
+    --background: 0 0% 98%;
+    --foreground: 240 10% 3%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3%;
+
+    /* Primary - Cyan/Blue (less vibrant) */
+    --primary: 195 85% 42%;
+    --primary-light: 195 85% 52%;
+    --primary-dark: 195 85% 32%;
+    --primary-foreground: 0 0% 100%;
+   
+
+    /* Secondary - Light Gray */
+    --secondary: 240 10% 92%;
+    --secondary-foreground: 240 10% 3%;
+
+    /* Muted - Light Gray */
+    --muted: 240 10% 96%;
+    --muted-foreground: 240 10% 45%;
+
+    /* Accent - Purple/Violet */
+    --accent: 270 90% 60%;
+    --accent-foreground: 0 0% 100%;
+
+    /* Semantic Colors */
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 38 92% 50%;
+    --warning-foreground: 240 10% 3%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* UI Elements */
+    --border: 240 10% 88%;
+    --input: 240 10% 88%;
+    --ring: 195 85% 42%;
+
+    --radius: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 24px;
+
+    /* Shadows - Enhanced for light theme */
+    --shadow-sm: 0 1px 2px 0 hsl(240 10% 3% / 0.06);
+    --shadow-md: 0 4px 6px -1px hsl(240 10% 3% / 0.08), 0 2px 4px -2px hsl(240 10% 3% / 0.04);
+    --shadow-lg: 0 10px 15px -3px hsl(240 10% 3% / 0.1), 0 4px 6px -4px hsl(240 10% 3% / 0.06);
+    --shadow-xl: 0 20px 25px -5px hsl(240 10% 3% / 0.12), 0 8px 10px -6px hsl(240 10% 3% / 0.06);
+    
+    /* Glow Effects - Cyan/Blue */
+    --shadow-glow-primary: 0 0 20px -5px hsl(195 85% 42% / 0.35);
+    --shadow-glow-accent: 0 0 20px -5px hsl(270 90% 60% / 0.35);
+    --shadow-glow-success: 0 0 20px -5px hsl(142 76% 36% / 0.35);
+  }
+
+  .dark {
+    /* ============================================
+       DARK MODE - Enhanced Neon Glow Effects
+    ============================================ */
+    --background: 240 10% 3%;
+    --foreground: 0 0% 98%;
+
+    --card: 240 10% 5%;
+    --card-foreground: 0 0% 98%;
+
+    --popover: 240 10% 5%;
+    --popover-foreground: 0 0% 98%;
+
+    /* Primary - Vibrant Cyan with enhanced glow */
+    --primary: 190 100% 50%;
+    --primary-light: 190 100% 60%;
+    --primary-dark: 190 100% 40%;
+    --primary-foreground: 240 10% 3%;
+
+    /* Secondary - Dark Charcoal */
+    --secondary: 240 10% 12%;
+    --secondary-foreground: 0 0% 98%;
+
+    --muted: 240 10% 15%;
+    --muted-foreground: 240 10% 60%;
+
+    --accent: 270 90% 60%;
+    --accent-foreground: 240 10% 3%;
+
+    --success: 142 70% 45%;
+    --success-foreground: 240 10% 3%;
+
+    --warning: 38 92% 50%;
+    --warning-foreground: 240 10% 3%;
+
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 240 10% 15%;
+    --input: 240 10% 15%;
+    --ring: 190 100% 50%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+}
+
+@layer components {
+  /* ============================================
+     GLASSMORPHISM CARDS
+  ============================================ */
+  
+  /* Glass Card - Stunning Glass Effect */
+  .glass-card {
+    @apply bg-white/70 backdrop-blur-xl border border-white/20 shadow-xl;
+  }
+  
+  .dark .glass-card {
+    @apply bg-white/10 backdrop-blur-xl border border-white/10 shadow-xl;
+  }
+
+  /* Glass Card Hover */
+  .glass-card-hover {
+    @apply bg-white/60 backdrop-blur-lg border border-white/20 shadow-lg transition-all duration-300;
+  }
+  
+  .dark .glass-card-hover {
+    @apply bg-white/10 backdrop-blur-lg border border-white/10 shadow-lg;
+  }
+
+  .glass-card-hover:hover {
+    @apply bg-white/80 shadow-xl;
+    transform: translateY(-2px);
+  }
+  
+  .dark .glass-card-hover:hover {
+    @apply bg-white/15;
+  }
+
+  /* Gradient Border Card */
+  .gradient-border-card {
+    @apply relative bg-white rounded-xl p-[1px];
+    background: linear-gradient(135deg, hsl(var(--primary) / 0.3), hsl(var(--accent) / 0.3), hsl(var(--primary) / 0.3));
+  }
+  
+  .gradient-border-card > * {
+    @apply rounded-xl;
+  }
+
+  /* Premium Card */
+  .card-premium {
+    @apply bg-white rounded-2xl border border-border shadow-lg relative overflow-hidden;
+    background: linear-gradient(135deg, white 0%, hsl(var(--secondary) / 0.3) 100%);
+  }
+  
+  .card-premium::before {
+    content: '';
+    @apply absolute inset-0 opacity-0 transition-opacity duration-300;
+    background: linear-gradient(135deg, hsl(var(--primary) / 0.05), hsl(var(--accent) / 0.05));
+  }
+  
+  .card-premium:hover::before {
+    @apply opacity-100;
+  }
+
+  /* ============================================
+     STUNNING BUTTONS
+  ============================================ */
+
+  /* Primary Button - Glow Effect */
+  .btn-primary {
+    @apply inline-flex items-center justify-center px-6 py-3 text-sm font-semibold rounded-lg transition-all duration-300;
+    background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-dark)));
+    color: white;
+    box-shadow: var(--shadow-glow-primary);
+  }
+
+  .btn-primary:hover {
+    @apply shadow-lg;
+    box-shadow: 0 0 30px -5px hsl(var(--primary) / 0.5);
+    transform: translateY(-2px);
+  }
+
+  .btn-primary:active {
+    transform: translateY(0);
+    box-shadow: var(--shadow-glow-primary);
+  }
+
+  /* Secondary Button - Gradient Border */
+  .btn-secondary {
+    @apply inline-flex items-center justify-center px-6 py-3 text-sm font-semibold rounded-lg transition-all duration-300;
+    background: white;
+    color: hsl(var(--foreground));
+    border: 2px solid hsl(var(--border));
+  }
+
+  .btn-secondary:hover {
+    @apply border-primary/50;
+    background: hsl(var(--secondary)/50);
+    transform: translateY(-2px);
+  }
+
+  /* Ghost Button */
+  .btn-ghost {
+    @apply inline-flex items-center justify-center px-5 py-2.5 text-sm font-medium rounded-lg transition-all duration-200;
+    background-color: transparent;
+    color: hsl(var(--muted-foreground));
+  }
+
+  .btn-ghost:hover {
+    background-color: hsl(var(--muted));
+    color: hsl(var(--foreground));
+  }
+
+  /* Destructive Button */
+  .btn-destructive {
+    @apply inline-flex items-center justify-center px-5 py-2.5 text-sm font-medium rounded-lg transition-colors duration-200;
+    background-color: hsl(var(--destructive));
+    color: white;
+  }
+
+  .btn-destructive:hover {
+    background-color: hsl(var(--destructive) / 0.9);
+  }
+
+  /* Glow Button - Special */
+  .btn-glow {
+    @apply inline-flex items-center justify-center px-6 py-3 text-sm font-semibold rounded-lg transition-all duration-300;
+    background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
+    color: white;
+    box-shadow: 0 0 30px -5px hsl(var(--primary) / 0.5), 0 0 60px -10px hsl(var(--accent) / 0.3);
+  }
+
+  .btn-glow:hover {
+    @apply shadow-xl;
+    box-shadow: 0 0 40px -5px hsl(var(--primary) / 0.6), 0 0 80px -10px hsl(var(--accent) / 0.4);
+    transform: translateY(-2px) scale(1.02);
+  }
+
+  /* Icon Button */
+  .btn-icon {
+    @apply inline-flex items-center justify-center w-10 h-10 rounded-lg transition-all duration-200;
+    background: transparent;
+    color: hsl(var(--muted-foreground));
+  }
+
+  .btn-icon:hover {
+    @apply bg-secondary text-foreground;
+  }
+
+  /* ============================================
+     INPUTS
+  ============================================ */
+
+  /* Simple Input Style - Enhanced */
+  .input-clean {
+    @apply w-full px-4 py-3 text-sm rounded-lg border border-border bg-white transition-all duration-200;
+    color: hsl(var(--foreground));
+  }
+
+  .input-clean::placeholder {
+    color: hsl(var(--muted-foreground));
+  }
+
+  .input-clean:focus {
+    @apply outline-none ring-2;
+    border-color: hsl(var(--primary));
+    box-shadow: 0 0 0 4px hsl(var(--primary) / 0.1), var(--shadow-glow-primary);
+  }
+
+  /* Floating Input Style */
+  .input-float {
+    @apply w-full px-4 py-3 text-sm rounded-lg border border-border bg-white/80 backdrop-blur transition-all duration-200;
+    color: hsl(var(--foreground));
+  }
+
+  .input-float:focus {
+    @apply outline-none ring-2 bg-white;
+    border-color: hsl(var(--primary));
+    box-shadow: 0 0 0 4px hsl(var(--primary) / 0.1);
+  }
+
+  /* ============================================
+     TABS
+  ============================================ */
+
+  /* Simple Tab Style */
+  .tab {
+    @apply inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-md transition-colors duration-200;
+    background-color: transparent;
+    color: hsl(var(--muted-foreground));
+  }
+
+  .tab:hover {
+    background-color: hsl(var(--muted));
+    color: hsl(var(--foreground));
+  }
+
+  .tab-active {
+    @apply inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-md transition-colors duration-200;
+    background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-dark)));
+    color: white;
+    box-shadow: var(--shadow-glow-primary);
+  }
+
+  .tab-active:hover {
+    @apply shadow-lg;
+    box-shadow: 0 0 20px -5px hsl(var(--primary) / 0.5);
+  }
+
+  /* ============================================
+     LABELS & TEXT
+  ============================================ */
+
+  /* Label Style */
+  .label-clean {
+    @apply block text-sm font-semibold text-foreground mb-1.5;
+  }
+
+  /* Section Title */
+  .section-title {
+    @apply text-2xl sm:text-3xl font-bold text-foreground;
+  }
+
+  /* Section Subtitle */
+  .section-subtitle {
+    @apply text-base text-muted-foreground;
+  }
+
+  /* QR Preview Container */
+  .qr-preview-container {
+    @apply bg-white rounded-lg border border-border p-6 flex items-center justify-center;
+  }
+
+  /* Badge */
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 text-xs font-medium rounded-full;
+    background-color: hsl(var(--secondary));
+    color: hsl(var(--foreground));
+  }
+
+  .badge-primary {
+    @apply font-semibold;
+    background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
+    color: white;
+    box-shadow: var(--shadow-glow-primary);
+  }
+
+  /* Helper Text */
+  .helper-text {
+    @apply text-xs text-muted-foreground mt-1;
+  }
+
+  /* Divider */
+  .divider {
+    @apply border-t border-border my-4;
+  }
+
+  /* Section Container */
+  .section-container {
+    @apply max-w-6xl mx-auto px-4;
+  }
+
+  /* ============================================
+     SPECIAL EFFECTS
+  ============================================ */
+
+  /* Floating Animation Base */
+  .float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  /* Glow Text */
+  .text-glow {
+    text-shadow: 0 0 20px hsl(var(--primary) / 0.5);
+  }
+
+  /* Gradient Text */
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary via-accent to-primary;
+    background-size: 200% auto;
+    animation: gradient-shift 3s ease infinite;
+  }
+
+  /* Shimmer Effect */
+  .shimmer {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .shimmer::after {
+    content: '';
+    @apply absolute inset-0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+  }
+
+  /* Pulse Ring */
+  .pulse-ring {
+    position: relative;
+  }
+
+  .pulse-ring::before {
+    content: '';
+    @apply absolute inset-0 rounded-full;
+    animation: pulse-ring 2s ease-out infinite;
+    box-shadow: 0 0 0 0 hsl(var(--primary) / 0.4);
+  }
+
+  /* Magnetic Effect Container */
+  .magnetic {
+    transition: transform 0.2s ease-out;
+  }
+
+  /* Reveal Container */
+  .reveal-container {
+    overflow: hidden;
+  }
+
+  .reveal-content {
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* ============================================
+     PANEL STYLES
+  ============================================ */
+
+  /* Panel Section */
+  .panel-section {
+    @apply bg-white/50 backdrop-blur-lg rounded-2xl border border-white/50 shadow-xl;
+  }
+
+  /* Panel Header */
+  .panel-header {
+    @apply px-6 py-4 border-b border-border/50;
+  }
+
+  /* Panel Content */
+  .panel-content {
+    @apply p-6;
+  }
+
+  /* Floating Panel */
+  .panel-floating {
+    @apply fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2;
+    @apply bg-white rounded-2xl shadow-2xl border border-border/50;
+    @apply backdrop-blur-xl bg-white/95;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Animation Utilities */
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-out forwards;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.5s ease-out forwards;
+  }
+
+  .animate-slide-in-left {
+    animation: slideInLeft 0.5s ease-out forwards;
+  }
+
+  .animate-scale-in {
+    animation: scaleIn 0.3s ease-out forwards;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes slideUp {
+    from { 
+      opacity: 0; 
+      transform: translateY(20px); 
+    }
+    to { 
+      opacity: 1; 
+      transform: translateY(0); 
+    }
+  }
+
+  @keyframes slideInLeft {
+    from { 
+      opacity: 0; 
+      transform: translateX(-20px); 
+    }
+    to { 
+      opacity: 1; 
+      transform: translateX(0); 
+    }
+  }
+
+  @keyframes scaleIn {
+    from { 
+      opacity: 0; 
+      transform: scale(0.95); 
+    }
+    to { 
+      opacity: 1; 
+      transform: scale(1); 
+    }
+  }
+
+  /* Stagger Animation Delays */
+  .animation-delay-100 { animation-delay: 0.1s; }
+  .animation-delay-200 { animation-delay: 0.2s; }
+  .animation-delay-300 { animation-delay: 0.3s; }
+  .animation-delay-400 { animation-delay: 0.4s; }
+  .animation-delay-500 { animation-delay: 0.5s; }
+
+  /* ============================================
+     NEW ANIMATIONS
+  ============================================ */
+
+  @keyframes float {
+    0%, 100% { 
+      transform: translateY(0px); 
+    }
+    50% { 
+      transform: translateY(-10px); 
+    }
+  }
+
+  @keyframes gradient-shift {
+    0% { 
+      background-position: 0% 50%; 
+    }
+    50% { 
+      background-position: 100% 50%; 
+    }
+    100% { 
+      background-position: 0% 50%; 
+    }
+  }
+
+  @keyframes shimmer {
+    0% { 
+      background-position: -200% 0; 
+    }
+    100% { 
+      background-position: 200% 0; 
+    }
+  }
+
+  @keyframes pulse-ring {
+    0% {
+      transform: scale(0.8);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(2);
+      opacity: 0;
+    }
+  }
+
+  @keyframes sparkle {
+    0%, 100% {
+      opacity: 0;
+      transform: scale(0);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @keyframes border-glow {
+    0%, 100% {
+      border-color: hsl(var(--primary) / 0.3);
+    }
+    50% {
+      border-color: hsl(var(--primary) / 0.8);
+    }
+  }
+
+  @keyframes slide-down {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slide-up-fade {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* New Utility Classes */
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  .animate-gradient {
+    background-size: 200% auto;
+    animation: gradient-shift 3s ease infinite;
+  }
+
+  .animate-sparkle {
+    animation: sparkle 2s ease-in-out infinite;
+  }
+
+  .animate-border-glow {
+    animation: border-glow 2s ease-in-out infinite;
+  }
+
+  .animate-slide-down {
+    animation: slide-down 0.3s ease-out forwards;
+  }
+
+  .animate-slide-up-fade {
+    animation: slide-up-fade 0.4s ease-out forwards;
+  }
+
+  /* Hover Scale */
+  .hover-scale {
+    transition: transform 0.2s ease-out;
+  }
+
+  .hover-scale:hover {
+    transform: scale(1.02);
+  }
+
+  /* Hover Lift */
+  .hover-lift {
+    transition: all 0.3s ease-out;
+  }
+
+  .hover-lift:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-xl), var(--shadow-glow-primary);
+  }
+
+  /* Glow on Hover */
+  .hover-glow:hover {
+    box-shadow: 0 0 30px -5px hsl(var(--primary) / 0.4);
+  }
+
+  /* Hide Scrollbar */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Gradient Background */
+  .bg-gradient-primary {
+    background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
+  }
+
+  .bg-gradient-radial {
+    background: radial-gradient(ellipse at center, hsl(var(--secondary) / 0.5) 0%, transparent 70%);
+  }
+
+  /* Clip Path Utilities */
+  .clip-path-hexagon {
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  }
+
+  .clip-path-circle {
+    clip-path: circle(50% at 50% 50%);
+  }
+}
+
+/* Print styles for label maker */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  
+  .print-area, .print-area * {
+    visibility: visible;
+  }
+  
+  .print-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--secondary));
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted-foreground) / 0.3);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.5);
+}
+
+/* Selection */
+::selection {
+  background: hsl(var(--primary) / 0.2);
+  color: hsl(var(--foreground));
+}
+
+/* Focus Visible */
+:focus-visible {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: 2px;
+}
+

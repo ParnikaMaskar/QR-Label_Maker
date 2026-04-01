@@ -1,7 +1,9 @@
 import { motion } from "framer-motion";
 import { ArrowRight, QrCode } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export const HeroSection = () => {
+  const navigate = useNavigate();
   return (
     <section className="relative overflow-hidden hero-gradient">
       {/* Background Decorative Elements */}
@@ -70,9 +72,7 @@ export const HeroSection = () => {
             >
               <button
                 className="btn-primary group"
-                onClick={() => {
-                  document.getElementById("generator-section")?.scrollIntoView({ behavior: "smooth" });
-                }}
+                onClick={() => navigate('/qr-maker')}
               >
                 <QrCode className="w-5 h-5 mr-2" />
                 Create QR Code

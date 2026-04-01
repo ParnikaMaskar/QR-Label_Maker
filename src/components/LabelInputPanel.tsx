@@ -27,46 +27,7 @@ import {
 } from "@/components/ui/collapsible";
 import { FileUploader } from "./FileUploader";
 
-// Label Field interface
-interface LabelField {
-  id: string;
-  name: string;
-  value: string;
-  fontSize: number;
-  bold: boolean;
-}
-
-// Label Config interface
-interface LabelConfig {
-  layout: string;
-  fields: LabelField[];
-  qrMode: "static" | "dynamic";
-  staticQrValue: string;
-  dynamicQrFields: string[];
-  qrSize: number;
-  qrCodeType: string;
-  errorCorrectionLevel: "L" | "M" | "Q" | "H";
-  logo: string;
-  logoSize: number;
-  qrColor: string;
-  qrBgColor: string;
-  heading: string;
-  borderWidth: number;
-  borderColor: string;
-  qrShape: "square" | "circle";
-  qrStyle: string;
-  autoSize: boolean;
-  labelWidth?: number;
-  labelHeight?: number;
-  // AI-derived values
-  baseFontSize?: number;
-  padding?: number;
-  logoRatio?: number;
-  aiNote?: string;
-  minFontSize?: number;
-  textColor?: string;
-}
-
+import { LabelConfig, LabelField } from "./LabelMaker";
 type Props = {
   uploadedData: Record<string, string>[];
   availableColumns: string[];
@@ -88,6 +49,7 @@ type Props = {
   // AI Layout props
   applyAiLayout: () => void;
   isAiThinking: boolean;
+  generationMode?: "single" | "batch";
 };
 
 export default function LabelInputPanel({
@@ -106,15 +68,151 @@ export default function LabelInputPanel({
   clearData,
   applyAiLayout,
   isAiThinking,
+  generationMode = "batch",
 }: Props) {
+  if (generationMode === "single") {
+    return (
+      <div className="flex flex-col gap-4 w-full">
+        {/* Magic AI Layout for Single */}
+        {labelConfig.aiNote && !isAiThinking && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            className="px-3 py-2 bg-gradient-to-r from-purple-500/10 to-blue-500/10 rounded-lg border border-purple-500/20"
+          >
+            <p className="text-xs text-muted-foreground flex items-center gap-2">
+              <Sparkles className="w-3 h-3 text-purple-500" />
+              {labelConfig.aiNote}
+            </p>
+          </motion.div>
+        )}
+
+        {/* Content Details Form */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="glass-card p-5 rounded-xl space-y-4"
+        >
+          <div className="flex items-center justify-between border-b pb-4">
+            <h3 className="font-bold flex items-center gap-2 text-foreground">
+              <Type className="w-4 h-4 text-primary" />
+              Content Details
+            </h3>
+            <button
+              onClick={applyAiLayout}
+              disabled={isAiThinking}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs font-semibold shadow-sm transition-all hover:scale-105 ${
+                isAiThinking ? "opacity-70" : ""
+              }`}
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              AI Magic Layout
+            </button>
+          </div>
+
+          <div className="space-y-4 pt-2">
+            {/* Heading Field */}
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium text-foreground">Label Heading</Label>
+              <Input
+                value={labelConfig.heading}
+                onChange={(e) =>
+                  setLabelConfig((p: LabelConfig) => ({
+                    ...p,
+                    heading: e.target.value,
+                  }))
+                }
+                placeholder="Optional top heading"
+                className="input-float h-9"
+              />
+            </div>
+
+            {/* Dynamic Fields */}
+            {labelConfig.fields.map((field: LabelField) => (
+              <div key={field.id} className="space-y-1.5 relative group">
+                <div className="flex items-center justify-between">
+                  <Input
+                    value={field.name}
+                    onChange={(e) => updateField(field.id, { name: e.target.value })}
+                    className="h-6 w-1/3 text-xs bg-transparent border-none p-0 focus-visible:ring-0 text-muted-foreground font-medium"
+                  />
+                  <button
+                    onClick={() => removeField(field.id)}
+                    className="text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+                <Input
+                  value={field.value}
+                  onChange={(e) => updateField(field.id, { value: e.target.value })}
+                  placeholder={`Enter ${field.name.toLowerCase()}`}
+                  className="input-float h-9"
+                />
+              </div>
+            ))}
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={addField}
+              className="w-full mt-2 border-dashed text-muted-foreground"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Add Custom Detail
+            </Button>
+          </div>
+        </motion.div>
+
+        {/* Logo Upload Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="glass-card p-5 rounded-xl"
+        >
+          <div className="flex items-center gap-2 mb-4">
+            <ImageIcon className="w-4 h-4 text-primary" />
+            <h3 className="font-bold text-foreground">Logo (Optional)</h3>
+          </div>
+          {labelConfig.logo ? (
+            <div className="flex items-center gap-4 bg-secondary/30 p-3 rounded-lg border border-border">
+              <div className="w-16 h-16 rounded-xl border bg-white flex items-center justify-center p-1 relative">
+                <img
+                  src={labelConfig.logo}
+                  alt="Logo"
+                  className="w-full h-full object-contain"
+                />
+              </div>
+              <div className="flex-1">
+                <Label className="text-xs mb-1 block">Logo Size</Label>
+                <Slider
+                  value={[labelConfig.logoSize]}
+                  onValueChange={(v) =>
+                    setLabelConfig((p: LabelConfig) => ({ ...p, logoSize: v[0] }))
+                  }
+                  min={10} max={30} step={1}
+                />
+              </div>
+              <button onClick={clearLogo} className="p-2 hover:bg-destructive/10 text-muted-foreground hover:text-destructive rounded-lg">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          ) : (
+            <label className="flex flex-col items-center justify-center h-24 border-2 border-dashed border-border rounded-xl cursor-pointer hover:border-primary/50 hover:bg-secondary/30 transition-all group">
+              <Upload className="w-5 h-5 text-muted-foreground group-hover:text-primary mb-2" />
+              <span className="text-xs font-medium group-hover:text-primary">Click to upload logo</span>
+              <input type="file" className="hidden" accept="image/*" onChange={handleLogoUpload} />
+            </label>
+          )}
+        </motion.div>
+      </div>
+    );
+  }
+
+  // ==== BATCH MODE ====
   return (
-    <motion.div
-      initial={{ width: 0, opacity: 0 }}
-      animate={{ width: "40%", opacity: 1 }}
-      exit={{ width: 0, opacity: 0 }}
-      transition={{ type: "spring", stiffness: 260, damping: 30 }}
-      className="flex flex-col gap-4 overflow-hidden"
-    >
+    <div className="flex flex-col gap-4 overflow-hidden w-full">
       {/* ===== AI Magic Layout Button ===== */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -202,21 +300,21 @@ export default function LabelInputPanel({
       </motion.div>
 
       {/* ===== Row: Data + Logo ===== */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className={`grid grid-cols-1 md:grid-cols-2 gap-4`}>
         {/* Data Source - Glass Card */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="glass-card p-4 rounded-xl"
-        >
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-bold flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
-                <Database className="w-4 h-4 text-primary" />
-              </div>
-              Data Source
-            </h2>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="glass-card p-4 rounded-xl"
+          >
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-sm font-bold flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
+                  <Database className="w-4 h-4 text-primary" />
+                </div>
+                Data Source
+              </h2>
 
             {uploadedData.length > 0 && (
               <motion.button
@@ -304,7 +402,7 @@ export default function LabelInputPanel({
           )}
         </motion.div>
 
-        {/* Logo Upload - Glass Card */}
+      {/* Logo Upload - Glass Card */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -530,8 +628,7 @@ export default function LabelInputPanel({
               <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
-                variant="ghost"
-                className="h-8 w-8 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
+                className="h-8 w-8 flex items-center justify-center text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
                 onClick={() => removeField(field.id)}
               >
                 <Trash2 className="w-4 h-4" />
@@ -551,7 +648,7 @@ export default function LabelInputPanel({
           </div>
         )}
       </motion.div>
-    </motion.div>
+    </div>
   );
 }
 

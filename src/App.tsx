@@ -5,6 +5,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import ScanGoEntry from "./components/ScanGoEntry";
 import Index from "./pages/Index";
+import QRMakerPage from "./pages/QRMakerPage";
+import LabelMakerPage from "./pages/LabelMakerPage";
 import NotFound from "./pages/NotFound";
 import BlackFireCursor from "./components/BlackFireCursor";
 
@@ -21,6 +23,8 @@ const AppRoutes = () => {
       <Routes>
         <Route path="/" element={<ScanGoEntry />} />
         <Route path="/dashboard" element={<Index />} />
+        <Route path="/qr-maker" element={<QRMakerPage />} />
+        <Route path="/label-maker" element={<LabelMakerPage />} />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>

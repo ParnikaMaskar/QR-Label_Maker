@@ -68,7 +68,7 @@ export default function LabelPreviewPanel({
     setLabelConfig((prev: LabelConfig) => ({
       ...prev,
       ...preset.config,
-    }));
+    } as LabelConfig));
     toast.success(`Applied "${preset.name}" style`);
   };
 
@@ -127,27 +127,9 @@ export default function LabelPreviewPanel({
                 </CardDescription>
               </div>
             </div>
-            
+
             <div className="flex items-center gap-2">
               {aiInfo}
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => setShowStyleSettings(!showStyleSettings)}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-primary/10 to-accent/10 hover:from-primary/20 hover:to-accent/20 border border-primary/20 transition-all text-sm font-medium"
-              >
-                {showStyleSettings ? (
-                  <>
-                    <ArrowLeft className="w-4 h-4" />
-                    Back
-                  </>
-                ) : (
-                  <>
-                    <Palette className="w-4 h-4" />
-                    Style
-                  </>
-                )}
-              </motion.button>
             </div>
           </div>
         </CardHeader>
@@ -166,7 +148,7 @@ export default function LabelPreviewPanel({
                   </Badge>
                 )}
               </div>
-              
+
               <motion.div
                 initial={{ opacity: 0, scale: 0.9, rotateX: -10 }}
                 animate={{ opacity: 1, scale: 1, rotateX: 0 }}
@@ -176,10 +158,10 @@ export default function LabelPreviewPanel({
               >
                 {/* Glow Effect */}
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/30 to-accent/30 rounded-2xl blur-xl -z-10" />
-                
+
                 {/* 3D Container */}
                 <motion.div
-                  animate={{ 
+                  animate={{
                     rotateY: isHoveringLabel ? 5 : 0,
                     rotateX: isHoveringLabel ? 5 : 0,
                     scale: isHoveringLabel ? 1.02 : 1,
@@ -202,7 +184,7 @@ export default function LabelPreviewPanel({
                       </motion.div>
                     </div>
                   )}
-                  
+
                   {/* Label Preview */}
                   <motion.div
                     initial={{ scale: 0.9 }}
@@ -282,11 +264,10 @@ export default function LabelPreviewPanel({
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => setSelectedCategory(cat.id)}
-                    className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-                      selectedCategory === cat.id
+                    className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${selectedCategory === cat.id
                         ? "bg-gradient-to-r from-primary to-accent text-white shadow-lg"
                         : "bg-white text-muted-foreground hover:bg-white/80 border border-border"
-                    }`}
+                      }`}
                   >
                     {cat.icon} {cat.label}
                   </motion.button>
@@ -326,13 +307,12 @@ export default function LabelPreviewPanel({
                       key={preset.id}
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
-                      className={`flex-shrink-0 w-20 cursor-pointer rounded-lg border-2 overflow-hidden transition-all duration-200 snap-start ${
-                        labelConfig.borderWidth === preset.config.borderWidth &&
-                        labelConfig.borderColor === preset.config.borderColor &&
-                        labelConfig.layout === preset.config.layout
+                      className={`flex-shrink-0 w-20 cursor-pointer rounded-lg border-2 overflow-hidden transition-all duration-200 snap-start ${labelConfig.borderWidth === preset.config.borderWidth &&
+                          labelConfig.borderColor === preset.config.borderColor &&
+                          labelConfig.layout === preset.config.layout
                           ? "border-primary ring-2 ring-primary/30"
                           : "border-border hover:border-primary/50"
-                      }`}
+                        }`}
                       onClick={() => applyLabelPreset(preset)}
                     >
                       {/* Mini Preview */}
@@ -380,7 +360,7 @@ export default function LabelPreviewPanel({
                   <Download className="w-5 h-5" />
                   Export PDF
                 </motion.button>
-                
+
                 <motion.button
                   whileHover={{ scale: 1.02, translateY: -2 }}
                   whileTap={{ scale: 0.98 }}
@@ -390,8 +370,8 @@ export default function LabelPreviewPanel({
                   <Printer className="w-5 h-5" />
                   Print Labels
                   {uploadedData.length > 0 && (
-                    <Badge 
-                      variant="secondary" 
+                    <Badge
+                      variant="secondary"
                       className="ml-1 h-5 px-1.5 text-xs bg-white/20 text-white hover:bg-white/30"
                     >
                       {uploadedData.length}

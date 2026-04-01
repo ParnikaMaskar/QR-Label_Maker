@@ -1,14 +1,14 @@
 import React, { useState, useRef, useMemo, useCallback, useEffect } from "react";
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { toast } from "sonner";
 
-import { PrintConfig, defaultPrintConfig } from "./PrintSettings";
+import { PrintConfig, defaultPrintConfig, PrintSettings } from "./PrintSettings";
 import StyledQR, { generateStyledQRDataUrl, StyleConfig } from "./StyledQR";
 import LabelInputPanel from "./LabelInputPanel";
 import LabelPreviewPanel from "./LabelPreviewPanel";
 import LabelStylePanel from "./LabelStylePanel";
 import { runAiMagicLayout, getLogoDimensions, getLogoRatio, validateContentFit, AIConfigOutput } from "@/lib/aiLayoutEngine";
-import { Sparkles } from "lucide-react";
+import { Sparkles, Check, ChevronDown, ListPlus, Palette, Printer, Type } from "lucide-react";
 
 /* ============================================================
    Types
@@ -30,7 +30,7 @@ type QRCodeType =
   | "sqrc"
   | "frame";
 
-interface LabelField {
+export interface LabelField {
   id: string;
   name: string;
   value: string;
@@ -56,12 +56,12 @@ export interface LabelConfig {
   borderColor: string;
   qrShape: "square" | "circle";
   qrStyle:
-    | "square"
-    | "dots"
-    | "rounded"
-    | "extra-rounded"
-    | "classy"
-    | "classy-rounded";
+  | "square"
+  | "dots"
+  | "rounded"
+  | "extra-rounded"
+  | "classy"
+  | "classy-rounded";
   autoSize: boolean;
   labelWidth?: number;
   labelHeight?: number;
@@ -119,7 +119,69 @@ const defaultFields: LabelField[] = [
    Component
 ============================================================ */
 
+// Stepper Component
+const AccordionStep = ({
+  stepNum,
+  title,
+  subtitle,
+  isActive,
+  isCompleted,
+  onClick,
+  children,
+}: {
+  stepNum: number;
+  title: string;
+  subtitle?: string;
+  isActive: boolean;
+  isCompleted: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) => {
+  return (
+    <div className={`card-modern overflow-hidden transition-all duration-300 ${isActive ? 'ring-2 ring-primary/20 bg-white/80' : 'bg-white/40 hover:bg-white/60 cursor-pointer'}`}>
+      <div className="p-5 flex items-center justify-between select-none" onClick={onClick}>
+        <div className="flex items-center gap-4">
+          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-colors ${isActive ? 'bg-gradient-to-br from-primary to-accent text-white shadow-md' : isCompleted ? 'bg-success text-white' : 'bg-secondary text-muted-foreground'}`}>
+            {isCompleted && !isActive ? <Check className="w-4 h-4" /> : stepNum}
+          </div>
+          <div>
+            <h3 className={`font-semibold text-lg ${isActive ? 'text-foreground' : 'text-muted-foreground'}`}>{title}</h3>
+            {subtitle && <p className="text-sm text-muted-foreground line-clamp-1">{subtitle}</p>}
+          </div>
+        </div>
+        <ChevronDown className={`w-5 h-5 text-muted-foreground transition-transform duration-300 ${isActive ? 'rotate-180' : ''}`} />
+      </div>
+      <AnimatePresence initial={false}>
+        {isActive && (
+          <motion.section
+            initial="collapsed"
+            animate="open"
+            exit="collapsed"
+            variants={{
+              open: { opacity: 1, height: "auto" },
+              collapsed: { opacity: 0, height: 0 }
+            }}
+            transition={{ duration: 0.3, ease: [0.04, 0.62, 0.23, 0.98] }}
+          >
+            <div className="p-5 pt-0 border-t border-border/50 flex flex-col gap-4">
+              {children}
+            </div>
+          </motion.section>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
 export const LabelMaker = () => {
+  // Stepper State
+  const [activeStep, setActiveStep] = useState<number>(1);
+  const [completedSteps, setCompletedSteps] = useState<number[]>([]);
+
+  const advanceToStep = useCallback((step: number) => {
+    setCompletedSteps(prev => Array.from(new Set([...prev, step - 1])));
+    setActiveStep(step);
+  }, []);
   const [labelConfig, setLabelConfig] = useState<LabelConfig>({
     layout: "horizontal",
     fields: defaultFields,
@@ -168,11 +230,14 @@ export const LabelMaker = () => {
   const [showStyleSettings, setShowStyleSettings] = useState(false);
 
   const [activeStyleTab, setActiveStyleTab] = useState<
-    "qr" | "layout" | "fields" | "print"
-  >("qr");
+    "layout" | "fields" | "qr" | "print"
+  >("layout");
 
   // AI loading state for "sassy" animation
   const [isAiThinking, setIsAiThinking] = useState(false);
+
+  // Generation Mode
+  const [generationMode, setGenerationMode] = useState<"single" | "batch">("single");
 
   const printRef = useRef<HTMLDivElement>(null);
 
@@ -235,7 +300,7 @@ export const LabelMaker = () => {
     setTimeout(() => {
       // Prepare input for AI engine - use current print config dimensions
       const aiInput = {
-        fields: uploadedData.length > 0 ? uploadedData : [{ 
+        fields: uploadedData.length > 0 ? uploadedData : [{
           Title: labelConfig.fields[0]?.value || "",
           Subtitle: labelConfig.fields[1]?.value || "",
           Footer: labelConfig.fields[2]?.value || "",
@@ -287,7 +352,7 @@ export const LabelMaker = () => {
         // Update field font sizes based on AI recommendation
         fields: prev.fields.map((field, idx) => ({
           ...field,
-          fontSize: idx === 0 
+          fontSize: idx === 0
             ? Math.max(aiOutput.baseFontSize, field.fontSize)
             : field.fontSize,
         })),
@@ -295,7 +360,7 @@ export const LabelMaker = () => {
 
       // Build toast message with AI reasoning and suggestions
       let toastDescription = `Layout: ${aiOutput.layout} | Font: ${aiOutput.baseFontSize}px | QR: ${aiOutput.qrSize}px`;
-      
+
       if (aiOutput.needsExpansion) {
         toastDescription += `\nSuggested size: ${aiOutput.suggestedWidth}mm × ${aiOutput.suggestedHeight}mm`;
       }
@@ -501,31 +566,31 @@ export const LabelMaker = () => {
     let content: React.ReactNode = null;
 
     // Get layout class based on AI decision
-    const layoutClass = labelConfig.layout === 'horizontal' 
-      ? 'flex items-center gap-4' 
+    const layoutClass = labelConfig.layout === 'horizontal'
+      ? 'flex items-center gap-4'
       : labelConfig.layout === 'vertical'
-      ? 'flex flex-col items-center gap-2 text-center'
-      : labelConfig.layout === 'qr-only'
-      ? 'flex justify-center'
-      : 'flex items-center gap-4';
+        ? 'flex flex-col items-center gap-2 text-center'
+        : labelConfig.layout === 'qr-only'
+          ? 'flex justify-center'
+          : 'flex items-center gap-4';
 
     switch (labelConfig.layout) {
       case "horizontal": {
         // Get AI-derived width percentages for visual balance
         const leftWidth = labelConfig.leftWidthPercent || 40;
         const rightWidth = labelConfig.rightWidthPercent || 60;
-        
+
         content = (
           <div className={layoutClass}>
             {/* QR/Logo Section - Left */}
-            <div 
+            <div
               className="flex-shrink-0 flex items-center justify-center"
               style={{ width: `${leftWidth}%` }}
             >
               {qr}
             </div>
             {/* Text Section - Right */}
-            <div 
+            <div
               className="flex flex-col gap-1 overflow-hidden"
               style={{ width: `${rightWidth}%` }}
             >
@@ -579,7 +644,7 @@ export const LabelMaker = () => {
         );
         break;
     }
-    
+
     const pxPerMm = 4.5;
 
     const manualWidthPx =
@@ -641,21 +706,21 @@ export const LabelMaker = () => {
     }
 
     const paperSizes: Record<string, { width: string; height: string }> =
-      {
-        a3: { width: "297mm", height: "420mm" },
-        a4: { width: "210mm", height: "297mm" },
-        a5: { width: "148mm", height: "210mm" },
-        letter: { width: "8.5in", height: "11in" },
-        legal: { width: "8.5in", height: "14in" },
-        executive: { width: "7.25in", height: "10.5in" },
-        custom: { width: "210mm", height: "297mm" },
-      };
+    {
+      a3: { width: "297mm", height: "420mm" },
+      a4: { width: "210mm", height: "297mm" },
+      a5: { width: "148mm", height: "210mm" },
+      letter: { width: "8.5in", height: "11in" },
+      legal: { width: "8.5in", height: "14in" },
+      executive: { width: "7.25in", height: "10.5in" },
+      custom: { width: "210mm", height: "297mm" },
+    };
 
     const paper = paperSizes[printConfig.paperSize] || paperSizes.a4;
 
     const labelWidthMm = printConfig.labelWidth || 50;
     const labelHeightMm = printConfig.labelHeight || 30;
-    
+
     const labelWidthPx = labelWidthMm * 3.78;
     const labelHeightPx = labelHeightMm * 3.78;
     const maxQrSize = Math.min(labelWidthPx, labelHeightPx) * 0.7;
@@ -663,7 +728,7 @@ export const LabelMaker = () => {
     const qrSize = labelConfig.autoSize
       ? Math.min(maxQrSize, 100)
       : (labelConfig.qrSize || 80);
-    
+
     const baseFontSize = labelConfig.baseFontSize || 14;
     const padding = labelConfig.padding || 12;
     const textColor = labelConfig.textColor || '#000000';
@@ -712,7 +777,7 @@ export const LabelMaker = () => {
           const imgTag = `<img src="${qrDataUrl}" style="width:${qrSize}px;height:${qrSize}px;object-fit:contain;" alt="QR Code" />`;
 
           let contentHtml = "";
-          
+
           // Get layout class based on AI decision
           const layoutStyles = {
             horizontal: 'display:flex;gap:4mm;align-items:center;',
@@ -722,7 +787,7 @@ export const LabelMaker = () => {
             '2x4-label': 'display:flex;gap:4mm;align-items:center;',
             'product-tag': 'display:flex;flex-direction:column;align-items:center;gap:2mm;',
           };
-          
+
           const layoutStyle = layoutStyles[labelConfig.layout as keyof typeof layoutStyles] || layoutStyles.horizontal;
 
           switch (labelConfig.layout) {
@@ -752,7 +817,7 @@ export const LabelMaker = () => {
             case "product-tag":
               contentHtml = `<div style="${layoutStyle}">${fieldHtmls[0] || ""}${imgTag}<div style="overflow:hidden;">${fieldHtmls.slice(1).join("")}</div></div>`;
               break;
-            
+
             default:
               contentHtml = `<div style="${layoutStyle}">${imgTag}<div>${fieldHtmls.join("")}</div></div>`;
           }
@@ -775,8 +840,8 @@ export const LabelMaker = () => {
                 font-family: system-ui, -apple-system, sans-serif;
               "
             >
-              ${labelConfig.heading?.trim() 
-                ? `<p style="
+              ${labelConfig.heading?.trim()
+              ? `<p style="
                     text-align:center;
                     font-weight:600;
                     font-size:${baseFontSize}px;
@@ -788,8 +853,8 @@ export const LabelMaker = () => {
                   ">
                     ${labelConfig.heading}
                   </p>`
-                : ""
-              }
+              : ""
+            }
               ${contentHtml}
             </div>
           `;
@@ -900,10 +965,10 @@ export const LabelMaker = () => {
       `);
 
       printWindow.document.close();
-      
+
       // Notify success
       toast.success(`Print dialog opened! (${labelHTMLs.length} labels)`);
-      
+
       // Close the toast after a delay
       setTimeout(() => {
         toast.dismiss();
@@ -974,35 +1039,186 @@ export const LabelMaker = () => {
   ============================================================ */
 
   return (
-    <div className="flex h-screen gap-4 p-4">
-      <AnimatePresence>
-        {!showStyleSettings && (
-          <LabelInputPanel
-            uploadedData={uploadedData}
-            availableColumns={availableColumns}
-            showDataPreview={showDataPreview}
-            setShowDataPreview={setShowDataPreview}
-            labelConfig={labelConfig}
-            setLabelConfig={setLabelConfig}
-            addField={addField}
-            updateField={updateField}
-            removeField={removeField}
-            handleDataLoaded={handleDataLoaded}
-            handleLogoUpload={handleLogoUpload}
-            clearLogo={clearLogo}
-            clearData={clearData}
-            applyAiLayout={applyAiLayout}
-            isAiThinking={isAiThinking}
-          />
-        )}
-      </AnimatePresence>
+    <div className="flex flex-col lg:flex-row gap-6 p-4 max-w-7xl mx-auto items-start min-h-screen">
+      {/* LEFT COLUMN: STEPPER */}
+      <div className="flex-1 w-full space-y-4 max-w-2xl">
 
-      <div className="flex-1 flex flex-col gap-4">
+        {/* STEP 1: CHOOSE TARGET */}
+        <AccordionStep
+          stepNum={1}
+          title="Choose Label Source"
+          subtitle={generationMode === "batch" ? "Batch Generation" : "Single Label"}
+          isActive={activeStep === 1}
+          isCompleted={completedSteps.includes(1)}
+          onClick={() => setActiveStep(1)}
+        >
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <button
+              onClick={() => {
+                setGenerationMode("single");
+                advanceToStep(2);
+                if (uploadedData.length > 0) clearData();
+              }}
+              className={`flex flex-col items-center justify-center gap-3 p-6 rounded-xl border-2 transition-all duration-300 ${generationMode === "single"
+                ? "border-primary bg-primary/5 ring-4 ring-primary/10"
+                : "border-border hover:border-primary/50 bg-white"
+                }`}
+            >
+              <div className={`w-12 h-12 rounded-full flex items-center justify-center ${generationMode === "single" ? "bg-primary text-white" : "bg-primary/10 text-primary"}`}>
+                <Type className="w-6 h-6" />
+              </div>
+              <div className="text-center">
+                <h4 className="font-semibold text-foreground">Single Label</h4>
+                <p className="text-xs text-muted-foreground mt-1">Design one custom label</p>
+              </div>
+            </button>
+            <button
+              onClick={() => {
+                setGenerationMode("batch");
+                advanceToStep(2);
+              }}
+              className={`flex flex-col items-center justify-center gap-3 p-6 rounded-xl border-2 transition-all duration-300 ${generationMode === "batch"
+                ? "border-primary bg-primary/5 ring-4 ring-primary/10"
+                : "border-border hover:border-primary/50 bg-white"
+                }`}
+            >
+              <div className={`w-12 h-12 rounded-full flex items-center justify-center ${generationMode === "batch" ? "bg-primary text-white" : "bg-primary/10 text-primary"}`}>
+                <ListPlus className="w-6 h-6" />
+              </div>
+              <div className="text-center">
+                <h4 className="font-semibold text-foreground">Batch Labels</h4>
+                <p className="text-xs text-muted-foreground mt-1">Generate many from a CSV</p>
+              </div>
+            </button>
+          </div>
+        </AccordionStep>
+
+        {/* STEP 2: SETUP DATA & FIELDS */}
+        <AccordionStep
+          stepNum={2}
+          title={generationMode === "batch" ? "Upload Data & Map Fields" : "Enter Content"}
+          subtitle={`${labelConfig.fields.length} fields configured`}
+          isActive={activeStep === 2}
+          isCompleted={completedSteps.includes(2) || uploadedData.length > 0}
+          onClick={() => setActiveStep(2)}
+        >
+          <div className="pt-2">
+            <LabelInputPanel
+              uploadedData={uploadedData}
+              availableColumns={availableColumns}
+              showDataPreview={showDataPreview}
+              setShowDataPreview={setShowDataPreview}
+              labelConfig={labelConfig}
+              setLabelConfig={setLabelConfig}
+              addField={addField}
+              updateField={updateField}
+              removeField={removeField}
+              handleDataLoaded={(data) => {
+                handleDataLoaded(data);
+                advanceToStep(3);
+              }}
+              handleLogoUpload={handleLogoUpload}
+              clearLogo={clearLogo}
+              clearData={clearData}
+              applyAiLayout={applyAiLayout}
+              isAiThinking={isAiThinking}
+            />
+            {generationMode === "single" && (
+              <div className="pt-4 flex justify-end">
+                <button
+                  onClick={() => advanceToStep(3)}
+                  className="px-6 py-2 rounded-lg font-medium transition-colors bg-primary text-white hover:bg-primary/90"
+                >
+                  Next: Design
+                </button>
+              </div>
+            )}
+          </div>
+        </AccordionStep>
+
+        {/* STEP 3: DESIGN & STYLE */}
+        <AccordionStep
+          stepNum={3}
+          title="Design & Style"
+          subtitle={`Layout: ${labelConfig.layout}`}
+          isActive={activeStep === 3}
+          isCompleted={completedSteps.includes(3)}
+          onClick={() => setActiveStep(3)}
+        >
+          <div className="pt-2 space-y-4">
+            <div className="glass-card mb-4 bg-primary/5 p-4 rounded-xl border border-primary/20">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="font-semibold flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-purple-500" />
+                    Auto-Optimize?
+                  </h4>
+                  <p className="text-xs text-muted-foreground mt-1 max-w-[200px]">
+                    Let AI arrange your fields uniquely.
+                  </p>
+                </div>
+                <button
+                  onClick={applyAiLayout}
+                  disabled={isAiThinking}
+                  className={`px-4 py-2 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-lg text-sm font-medium transition-all shadow-md hover:shadow-lg ${isAiThinking ? 'opacity-70' : ''}`}
+                >
+                  {isAiThinking ? 'Thinking...' : 'Magic Layout'}
+                </button>
+              </div>
+            </div>
+            {/* INLINE LABEL STYLE PANEL REUSE */}
+            <LabelStylePanel
+              show={true}
+              onClose={() => { }}
+              activeStyleTab={activeStyleTab}
+              setActiveStyleTab={setActiveStyleTab}
+              labelConfig={labelConfig}
+              setLabelConfig={setLabelConfig}
+              availableColumns={availableColumns}
+              printConfig={printConfig}
+              setPrintConfig={setPrintConfig}
+              styleConfig={styleConfig}
+              setStyleConfig={setStyleConfig}
+              layoutPresets={layoutPresets}
+              setAutoPreviewSize={setAutoPreviewSize}
+            />
+            <div className="pt-4 flex justify-end">
+              <button
+                onClick={() => advanceToStep(4)}
+                className="px-6 py-2 rounded-lg font-medium transition-colors bg-primary text-white hover:bg-primary/90"
+              >
+                Next: Print Options
+              </button>
+            </div>
+          </div>
+        </AccordionStep>
+
+        {/* STEP 4: PRINT OPTIONS */}
+        <AccordionStep
+          stepNum={4}
+          title="Print Options"
+          subtitle={`${printConfig.labelWidth}mm x ${printConfig.labelHeight}mm`}
+          isActive={activeStep === 4}
+          isCompleted={completedSteps.includes(4)}
+          onClick={() => setActiveStep(4)}
+        >
+          <div className="pt-2">
+            <PrintSettings
+              config={printConfig}
+              onChange={setPrintConfig}
+              onManualResize={() => setAutoPreviewSize(false)}
+            />
+          </div>
+        </AccordionStep>
+      </div>
+
+      {/* RIGHT COLUMN: STICKY PREVIEW */}
+      <div className="w-full lg:w-[450px] xl:w-[500px] shrink-0 lg:sticky lg:top-24 pb-16">
         <LabelPreviewPanel
           uploadedData={uploadedData}
           printRef={printRef}
-          showStyleSettings={showStyleSettings}
-          setShowStyleSettings={setShowStyleSettings}
+          showStyleSettings={false}
+          setShowStyleSettings={() => { }}
           renderSingleLabel={renderSingleLabel}
           handlePrint={handlePrint}
           labelConfig={labelConfig}
@@ -1010,42 +1226,21 @@ export const LabelMaker = () => {
           styleConfig={styleConfig}
           setStyleConfig={setStyleConfig}
         />
-        
-        {/* Help Text Quote - Just above footer area */}
-        <div className="mt-auto p-4 bg-gradient-to-r from-primary/5 via-accent/5 to-primary/5 rounded-xl border border-primary/10">
+        <div className="mt-4 p-4 bg-gradient-to-r from-primary/5 via-accent/5 to-primary/5 rounded-xl border border-primary/10">
           <div className="flex items-start gap-3">
             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center flex-shrink-0">
-              <Sparkles className="w-5 h-5 text-white" />
+              <Printer className="w-5 h-5 text-white" />
             </div>
             <div>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Ensure your printer is connected and loaded with label paper. 
-                Click <span className="text-primary font-semibold">Style</span> to adjust label design. 
+                Ensure your printer is connected and loaded with label paper.
                 <br />
-                <span className="text-purple-500 font-semibold">Try the AI Magic Layout button for auto-optimization!</span>
+                <span className="text-primary font-semibold">Click Print in the preview panel above.</span>
               </p>
             </div>
           </div>
         </div>
       </div>
-
-      <AnimatePresence>
-        <LabelStylePanel
-          show={showStyleSettings}
-          onClose={() => setShowStyleSettings(false)}
-          activeStyleTab={activeStyleTab}
-          setActiveStyleTab={setActiveStyleTab}
-          labelConfig={labelConfig}
-          setLabelConfig={setLabelConfig}
-          availableColumns={availableColumns}
-          printConfig={printConfig}
-          setPrintConfig={setPrintConfig}
-          styleConfig={styleConfig}
-          setStyleConfig={setStyleConfig}
-          layoutPresets={layoutPresets}
-          setAutoPreviewSize={setAutoPreviewSize}
-        />
-      </AnimatePresence>
     </div>
   );
 };

@@ -8,8 +8,7 @@ import {
   Phone, 
   MessageSquare,
   MapPin,
-  Type,
-  SocialIcon
+  Type
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -110,7 +109,7 @@ export const ToolsGrid = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: index * 0.05 }}
-              onClick={() => navigate(`/?type=${tool.id}`)}
+              onClick={() => navigate(`/qr-maker?type=${tool.id}`)}
               className="card-modern p-6 text-left group hover:shadow-lg transition-all duration-300 h-full flex flex-col"
             >
               {/* Icon */}
@@ -145,7 +144,7 @@ export const ToolsGrid = () => {
           className="mt-12 text-center"
         >
           <button
-            onClick={() => document.getElementById("generator")?.scrollIntoView({ behavior: "smooth" })}
+            onClick={() => navigate('/qr-maker')}
             className="btn-secondary group"
           >
             <QrCode className="w-5 h-5 mr-2" />

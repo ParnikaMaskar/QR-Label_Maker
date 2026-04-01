@@ -165,346 +165,205 @@ export default function LabelStylePanel({
   if (!show) return null;
 
   return (
-    <motion.div
-      initial={{ x: "100%", opacity: 0 }}
-      animate={{ x: 0, opacity: 1 }}
-      exit={{ x: "100%", opacity: 0 }}
-      transition={{ type: "spring", damping: 25, stiffness: 300 }}
-      className="w-1/3 flex flex-col gap-4"
-    >
-      <div className="glass-card p-4 h-full overflow-y-auto">
-        {/* HEADER */}
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-semibold flex items-center gap-2">
-            <Palette className="w-5 h-5" />
-            Style & QR Settings
-          </h2>
-          <Button variant="ghost" size="sm" onClick={onClose}>
-            <X className="w-4 h-4" />
-          </Button>
-        </div>
+    <div className="flex flex-col gap-4 w-full">
+      <div className="glass-card p-4 h-full overflow-y-auto">      <div className="space-y-8 pb-4">
+        {/* LAYOUT SECTION */}
+        <section>
+          <div className="flex items-center gap-2 mb-3 border-b pb-2">
+            <Layout className="w-4 h-4 text-primary" />
+            <h3 className="font-semibold text-sm">Layout Pattern</h3>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            {Object.entries(layoutPresets).map(([key, preset]) => (
+              <button
+                key={key}
+                onClick={() =>
+                  setLabelConfig((prev: any) => ({ ...prev, layout: key }))
+                }
+                className={`p-2 rounded-lg border-2 text-left transition-all ${
+                  labelConfig.layout === key
+                    ? "border-primary bg-primary/10"
+                    : "border-border hover:border-primary/50 bg-white"
+                }`}
+              >
+                <span className="text-xs font-semibold block text-foreground">{preset.name}</span>
+                <span className="text-[10px] text-muted-foreground">{preset.description}</span>
+              </button>
+            ))}
+          </div>
+        </section>
 
-        {/* TABS */}
-        <div className="flex border-b mb-4">
-          <Button
-            variant="ghost"
-            className={`flex-1 rounded-none border-b-2 ${
-              activeStyleTab === "qr"
-                ? "border-primary"
-                : "border-transparent"
-            }`}
-            onClick={() => setActiveStyleTab("qr")}
-          >
-            <QrCode className="w-4 h-4 mr-2" />
-            QR Code
-          </Button>
+        {/* DIMENSIONS & STYLING SECTION */}
+        <section>
+          <div className="flex items-center gap-2 mb-3 border-b pb-2">
+            <Palette className="w-4 h-4 text-primary" />
+            <h3 className="font-semibold text-sm">Dimensions & Styling</h3>
+          </div>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <Label className="text-sm font-medium">Auto Size Label</Label>
+              <Switch
+                checked={labelConfig.autoSize}
+                onCheckedChange={(checked) =>
+                  setLabelConfig((prev: any) => ({
+                    ...prev,
+                    autoSize: checked,
+                    ...(checked ? { labelWidth: undefined, labelHeight: undefined } : {}),
+                  }))
+                }
+              />
+            </div>
 
-          <Button
-            variant="ghost"
-            className={`flex-1 rounded-none border-b-2 ${
-              activeStyleTab === "layout"
-                ? "border-primary"
-                : "border-transparent"
-            }`}
-            onClick={() => setActiveStyleTab("layout")}
-          >
-            <Layout className="w-4 h-4 mr-2" />
-            Layout
-          </Button>
-
-          <Button
-            variant="ghost"
-            className={`flex-1 rounded-none border-b-2 ${
-              activeStyleTab === "fields"
-                ? "border-primary"
-                : "border-transparent"
-            }`}
-            onClick={() => setActiveStyleTab("fields")}
-          >
-            <Palette className="w-4 h-4 mr-2" />
-            Styling
-          </Button>
-
-          <Button
-            variant="ghost"
-            className={`flex-1 rounded-none border-b-2 ${
-              activeStyleTab === "print"
-                ? "border-primary"
-                : "border-transparent"
-            }`}
-            onClick={() => setActiveStyleTab("print")}
-          >
-            <Printer className="w-4 h-4 mr-2" />
-            Print
-          </Button>
-        </div>
-
-        {/* QR TAB */}
-        {activeStyleTab === "qr" && (
-          <>
-            <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>QR Mode</Label>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm">Static</span>
-                  <Switch
-                    checked={labelConfig.qrMode === "dynamic"}
-                    onCheckedChange={(checked) =>
-                      setLabelConfig((prev: any) => ({
-                        ...prev,
-                        qrMode: checked ? "dynamic" : "static",
-                      }))
-                    }
-                  />
-                  <span className="text-sm">Dynamic</span>
-                </div>
-              </div>
-
-              {labelConfig.qrMode === "static" ? (
-                <div className="space-y-2">
-                  <Label>Static QR Content</Label>
-                  <Input
-                    value={labelConfig.staticQrValue}
-                    onChange={(e) =>
-                      setLabelConfig((prev: any) => ({
-                        ...prev,
-                        staticQrValue: e.target.value,
-                      }))
-                    }
-                  />
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  <Label>Concatenate Columns for QR</Label>
-                  <Select
-                    value={labelConfig.dynamicQrFields.join(",")}
-                    onValueChange={(value) =>
-                      setLabelConfig((prev: any) => ({
-                        ...prev,
-                        dynamicQrFields: value
-                          ? value.split(",")
-                          : [],
-                      }))
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select columns" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {availableColumns.map((col) => (
-                        <SelectItem key={col} value={col}>
-                          {col}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
-
-              <div className="space-y-2">
-                <Label>QR Size</Label>
+                <Label className="text-xs text-muted-foreground">Width (mm)</Label>
                 <Slider
-                  value={[labelConfig.qrSize]}
-                  min={40}
-                  max={200}
-                  step={5}
                   disabled={labelConfig.autoSize}
+                  value={[labelConfig.labelWidth || 50]}
+                  min={20}
+                  max={150}
+                  step={1}
                   onValueChange={([v]) =>
-                    setLabelConfig((prev: any) => ({
-                      ...prev,
-                      qrSize: v,
-                    }))
+                    setLabelConfig((prev: any) => ({ ...prev, labelWidth: v }))
+                  }
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs text-muted-foreground">Height (mm)</Label>
+                <Slider
+                  disabled={labelConfig.autoSize}
+                  value={[labelConfig.labelHeight || 30]}
+                  min={15}
+                  max={100}
+                  step={1}
+                  onValueChange={([v]) =>
+                    setLabelConfig((prev: any) => ({ ...prev, labelHeight: v }))
                   }
                 />
               </div>
             </div>
 
-            {/* QR Presets Section */}
-            <div className="mt-6 space-y-3">
-              <div className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-primary" />
-                <Label className="text-sm font-medium">Quick QR Styles</Label>
+            <div className="grid grid-cols-2 gap-4 pt-2">
+              <div className="space-y-2">
+                <Label className="text-xs text-muted-foreground">Border Width</Label>
+                <Slider
+                  value={[labelConfig.borderWidth]}
+                  min={0}
+                  max={6}
+                  step={1}
+                  onValueChange={([v]) =>
+                    setLabelConfig((prev: any) => ({ ...prev, borderWidth: v }))
+                  }
+                />
               </div>
-
-              {/* Category Filter */}
-              <div className="flex gap-1 overflow-x-auto pb-1">
-                {PRESET_CATEGORIES.slice(0, 5).map((cat) => (
-                  <button
-                    key={cat.id}
-                    onClick={() => setSelectedCategory(cat.id)}
-                    className={`flex-shrink-0 px-2 py-1 rounded-full text-xs transition-all ${
-                      selectedCategory === cat.id
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-secondary text-muted-foreground hover:bg-secondary/80"
-                    }`}
-                  >
-                    {cat.icon} {cat.label}
-                  </button>
-                ))}
-              </div>
-
-              {/* Presets Grid */}
-              <div className="relative">
-                {filteredPresets.length > 5 && (
-                  <>
-                    <button
-                      onClick={scrollLeft}
-                      className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-6 h-6 rounded-full bg-background border shadow flex items-center justify-center"
-                    >
-                      <ChevronLeft className="w-3 h-3" />
-                    </button>
-                    <button
-                      onClick={scrollRight}
-                      className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-6 h-6 rounded-full bg-background border shadow flex items-center justify-center"
-                    >
-                      <ChevronRight className="w-3 h-3" />
-                    </button>
-                  </>
-                )}
-
-                <div
-                  ref={setScrollContainer}
-                  className="flex gap-2 overflow-x-auto py-1 px-1 scrollbar-hide"
-                  style={{ scrollBehavior: "smooth" }}
-                >
-                  <AnimatePresence mode="popLayout">
-                    {filteredPresets.slice(0, 10).map((preset) => (
-                      <QRCard key={preset.id} preset={preset} />
-                    ))}
-                  </AnimatePresence>
+              <div className="space-y-2">
+                <Label className="text-xs text-muted-foreground">QR Color</Label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="color"
+                    className="w-8 h-8 rounded cursor-pointer"
+                    value={labelConfig.qrColor}
+                    onChange={(e) =>
+                      setLabelConfig((prev: any) => ({ ...prev, qrColor: e.target.value }))
+                    }
+                  />
+                  <span className="text-xs uppercase">{labelConfig.qrColor}</span>
                 </div>
               </div>
             </div>
+          </div>
+        </section>
 
-            {/* ADVANCED QR STYLES */}
-            <QRStylePanel
-              styleConfig={styleConfig}
-              setStyleConfig={setStyleConfig}
-            />
-          </>
-        )}
-
-        {/* LAYOUT TAB */}
-        {activeStyleTab === "layout" && (
+        {/* QR CONFIG SECTION */}
+        <section>
+          <div className="flex items-center gap-2 mb-3 border-b pb-2">
+            <QrCode className="w-4 h-4 text-primary" />
+            <h3 className="font-semibold text-sm">QR Code Settings</h3>
+          </div>
           <div className="space-y-4">
-            <Label>Choose Layout</Label>
-            <div className="grid grid-cols-2 gap-2">
-              {Object.entries(layoutPresets).map(
-                ([key, preset]) => (
-                  <button
-                    key={key}
-                    onClick={() =>
-                      setLabelConfig((prev: any) => ({
-                        ...prev,
-                        layout: key,
-                      }))
-                    }
-                    className={`p-2 rounded-lg border-2 text-left transition-all ${
-                      labelConfig.layout === key
-                        ? "border-primary bg-primary/10"
-                        : "border-border hover:border-primary/50"
-                    }`}
-                  >
-                    <span className="text-xs font-medium block">
-                      {preset.name}
-                    </span>
-                    <span className="text-[10px] text-muted-foreground">
-                      {preset.description}
-                    </span>
-                  </button>
-                )
-              )}
+            <div className="flex items-center gap-4">
+              <div className="flex-1 space-y-2">
+                <Label className="text-xs text-muted-foreground">Mode</Label>
+                <Select
+                  value={labelConfig.qrMode}
+                  onValueChange={(v) =>
+                    setLabelConfig((prev: any) => ({ ...prev, qrMode: v }))
+                  }
+                >
+                  <SelectTrigger className="h-8 text-xs">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="static">Static (Same URL)</SelectItem>
+                    <SelectItem value="dynamic">Dynamic (From Data)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex-1 space-y-2">
+                <Label className="text-xs text-muted-foreground">QR Size</Label>
+                <Slider
+                  value={[labelConfig.qrSize]}
+                  min={30}
+                  max={120}
+                  step={5}
+                  disabled={labelConfig.autoSize}
+                  onValueChange={([v]) =>
+                    setLabelConfig((prev: any) => ({ ...prev, qrSize: v }))
+                  }
+                />
+              </div>
+            </div>
+
+            {labelConfig.qrMode === "static" ? (
+              <div className="space-y-2">
+                <Label className="text-xs text-muted-foreground">Static Link/Text</Label>
+                <Input
+                  className="h-8 text-xs"
+                  value={labelConfig.staticQrValue}
+                  onChange={(e) =>
+                    setLabelConfig((prev: any) => ({ ...prev, staticQrValue: e.target.value }))
+                  }
+                />
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <Label className="text-xs text-muted-foreground">Dynamic Fields to Encode</Label>
+                <Select
+                  value={labelConfig.dynamicQrFields.join(",")}
+                  onValueChange={(value) =>
+                    setLabelConfig((prev: any) => ({
+                      ...prev,
+                      dynamicQrFields: value ? value.split(",") : [],
+                    }))
+                  }
+                >
+                  <SelectTrigger className="h-8 text-xs">
+                    <SelectValue placeholder="Select column..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableColumns.map((col) => (
+                      <SelectItem key={col} value={col}>
+                        {col}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+            
+            {/* Quick QR Styles Grid */}
+            <div className="pt-2">
+              <Label className="text-xs text-muted-foreground mb-2 block">Quick QR Styles</Label>
+              <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide py-1">
+                {filteredPresets.slice(0, 10).map((preset) => (
+                  <QRCard key={preset.id} preset={preset} />
+                ))}
+              </div>
             </div>
           </div>
-        )}
-
-        {/* STYLING TAB */}
-        {activeStyleTab === "fields" && (
-          <div className="space-y-4">
-            {/* AUTO / MANUAL SIZE TOGGLE */}
-<div className="flex items-center justify-between">
-  <Label>Auto Size</Label>
-  <Switch
-    checked={labelConfig.autoSize}
-    onCheckedChange={(checked) =>
-      setLabelConfig((prev: any) => ({
-        ...prev,
-        autoSize: checked,
-        ...(checked
-          ? { labelWidth: undefined, labelHeight: undefined }
-          : {}),
-      }))
-    }
-  />
-</div>
-
-            <Label>QR Colors</Label>
-            <input
-              type="color"
-              value={labelConfig.qrColor}
-              onChange={(e) =>
-                setLabelConfig((prev: any) => ({
-                  ...prev,
-                  qrColor: e.target.value,
-                }))
-              }
-            />
-
-            <Label>Border Width</Label>
-            <Slider
-              value={[labelConfig.borderWidth]}
-              min={0}
-              max={6}
-              step={1}
-              onValueChange={([v]) =>
-                setLabelConfig((prev: any) => ({
-                  ...prev,
-                  borderWidth: v,
-                }))
-              }
-            />
-
-            <Label>Label Width (mm)</Label>
-            <Slider
-            disabled={labelConfig.autoSize}
-              value={[labelConfig.labelWidth]}
-              min={20}
-              max={150}
-              step={1}
-              onValueChange={([v]) =>
-                setLabelConfig((prev: any) => ({
-                  ...prev,
-                  labelWidth: v,
-                }))
-              }
-            />
-
-            <Label>Label Height (mm)</Label>
-            <Slider
-            
-              value={[labelConfig.labelHeight]}
-              min={15}
-              max={100}
-              step={1}
-              onValueChange={([v]) =>
-                setLabelConfig((prev: any) => ({
-                  ...prev,
-                  labelHeight: v,
-                }))
-              }
-            />
-          </div>
-        )}
-
-        {/* PRINT TAB */}
-        {activeStyleTab === "print" && (
-          <PrintSettings
-            config={printConfig}
-            onChange={setPrintConfig}
-            onManualResize={() => setAutoPreviewSize(false)}   // ✅ auto → manual
-          />
-        )}
+        </section>
       </div>
-    </motion.div>
+      </div>
+    </div>
   );
 }

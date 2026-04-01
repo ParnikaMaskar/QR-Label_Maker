@@ -244,110 +244,11 @@ export default function LabelPreviewPanel({
               </div>
             </div>
 
-            {/* Quick Label Presets */}
-            <div className="w-full max-w-sm shrink-0">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 text-primary" />
-                  <h4 className="font-semibold text-base">Quick Label Styles</h4>
-                </div>
-                <span className="text-xs text-muted-foreground bg-secondary px-2 py-1 rounded-full">
-                  {filteredPresets.length} styles
-                </span>
-              </div>
 
-              {/* Category Filter */}
-              <div className="flex gap-1.5 overflow-x-auto pb-2 scrollbar-hide max-w-full">
-                {LABEL_PRESET_CATEGORIES.slice(0, 6).map((cat) => (
-                  <motion.button
-                    key={cat.id}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => setSelectedCategory(cat.id)}
-                    className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${selectedCategory === cat.id
-                        ? "bg-gradient-to-r from-primary to-accent text-white shadow-lg"
-                        : "bg-white text-muted-foreground hover:bg-white/80 border border-border"
-                      }`}
-                  >
-                    {cat.icon} {cat.label}
-                  </motion.button>
-                ))}
-              </div>
 
-              {/* Presets Scroll */}
-              <div className="relative w-full overflow-hidden">
-                {filteredPresets.length > 4 && (
-                  <>
-                    <motion.button
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                      onClick={scrollLeft}
-                      className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-white/95 backdrop-blur-sm border shadow-lg flex items-center justify-center hover:bg-secondary transition-colors"
-                    >
-                      <ChevronLeft className="w-4 h-4" />
-                    </motion.button>
-                    <motion.button
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                      onClick={scrollRight}
-                      className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-white/95 backdrop-blur-sm border shadow-lg flex items-center justify-center hover:bg-secondary transition-colors"
-                    >
-                      <ChevronRight className="w-4 h-4" />
-                    </motion.button>
-                  </>
-                )}
 
-                <div
-                  ref={setScrollContainer}
-                  className="flex gap-2 overflow-x-auto scrollbar-hide py-2 px-8 snap-x"
-                  style={{ scrollBehavior: "smooth" }}
-                >
-                  {filteredPresets.slice(0, 10).map((preset) => (
-                    <motion.div
-                      key={preset.id}
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      className={`flex-shrink-0 w-20 cursor-pointer rounded-lg border-2 overflow-hidden transition-all duration-200 snap-start ${labelConfig.borderWidth === preset.config.borderWidth &&
-                          labelConfig.borderColor === preset.config.borderColor &&
-                          labelConfig.layout === preset.config.layout
-                          ? "border-primary ring-2 ring-primary/30"
-                          : "border-border hover:border-primary/50"
-                        }`}
-                      onClick={() => applyLabelPreset(preset)}
-                    >
-                      {/* Mini Preview */}
-                      <div
-                        className="aspect-square p-1.5 flex items-center justify-center"
-                        style={{
-                          background: preset.previewColors.background,
-                        }}
-                      >
-                        <div
-                          className="w-10 h-8 rounded border flex items-center justify-center overflow-hidden"
-                          style={{
-                            borderColor: preset.previewColors.border,
-                            borderWidth: preset.config.borderWidth,
-                          }}
-                        >
-                          <div className="scale-35">
-                            <StyledQR
-                              value="https://example.com"
-                              size={28}
-                              styleConfig={styleConfig}
-                            />
-                          </div>
-                        </div>
-                      </div>
-                      <div className="p-1 bg-card border-t border-border">
-                        <p className="text-[9px] font-medium truncate text-center">
-                          {preset.name}
-                        </p>
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              </div>
-            </div>
+
+
 
             {/* Action Buttons */}
             <div className="w-full max-w-sm shrink-0">

@@ -1122,6 +1122,7 @@ export const LabelMaker = () => {
               clearData={clearData}
               applyAiLayout={applyAiLayout}
               isAiThinking={isAiThinking}
+              generationMode={generationMode}
             />
             {generationMode === "single" && (
               <div className="pt-4 flex justify-end">

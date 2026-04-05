@@ -129,7 +129,7 @@ export default function LabelInputPanel({
 
             {/* Dynamic Fields */}
             {labelConfig.fields.map((field: LabelField) => (
-              <div key={field.id} className="space-y-1.5 relative group">
+              <div key={field.id} className="space-y-2 relative group p-3 bg-secondary/30 rounded-lg border border-border/50 hover:border-primary/30 transition-colors">
                 <div className="flex items-center justify-between">
                   <Input
                     value={field.name}
@@ -149,6 +149,28 @@ export default function LabelInputPanel({
                   placeholder={`Enter ${field.name.toLowerCase()}`}
                   className="input-float h-9"
                 />
+                {/* Font Size + Bold */}
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-1.5">
+                    <Label className="text-[10px]">Size</Label>
+                    <Input
+                      type="number"
+                      value={field.fontSize}
+                      onChange={(e) =>
+                        updateField(field.id, { fontSize: parseInt(e.target.value) || 12 })
+                      }
+                      className="h-7 w-14 text-xs"
+                    />
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <Label className="text-[10px]">Bold</Label>
+                    <Switch
+                      checked={field.bold}
+                      onCheckedChange={(checked) => updateField(field.id, { bold: checked })}
+                      className="scale-75"
+                    />
+                  </div>
+                </div>
               </div>
             ))}
 
@@ -492,162 +514,6 @@ export default function LabelInputPanel({
           )}
         </motion.div>
       </div>
-
-      {/* ===== Label Heading ===== */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
-        className="glass-card p-4 rounded-xl"
-      >
-        <h3 className="font-bold flex items-center gap-2 mb-3">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-500/20 to-orange-500/20 flex items-center justify-center">
-            <Type className="w-4 h-4 text-amber-500" />
-          </div>
-          Label Heading
-        </h3>
-
-        <motion.div whileFocus={{ scale: 1.01 }}>
-          <Input
-            value={labelConfig.heading}
-            onChange={(e) =>
-              setLabelConfig((p: LabelConfig) => ({
-                ...p,
-                heading: e.target.value,
-              }))
-            }
-            placeholder="Enter heading (shown on all labels)"
-            className="input-float"
-          />
-        </motion.div>
-      </motion.div>
-
-      {/* ===== Label Fields ===== */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4 }}
-        className="glass-card p-4 rounded-xl flex-1 overflow-hidden flex flex-col"
-      >
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="font-bold flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-green-500/20 to-emerald-500/20 flex items-center justify-center">
-              <GripHorizontal className="w-4 h-4 text-green-500" />
-            </div>
-            Label Fields
-          </h3>
-          <div className="flex items-center gap-2">
-            {/* AI Magic Layout Button near Add Field */}
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={applyAiLayout}
-              disabled={isAiThinking}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs font-semibold shadow-lg transition-all ${isAiThinking ? 'opacity-70' : ''}`}
-              title="AI Magic Layout - Auto-optimize your label"
-            >
-              <Sparkles className="w-3.5 h-3.5" />
-              AI Magic Layout
-            </motion.button>
-            
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={addField}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-primary to-accent text-white text-xs font-semibold shadow-lg"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              Add Field
-            </motion.button>
-          </div>
-        </div>
-
-        <div className="flex-1 overflow-auto space-y-3 pr-1 scrollbar-hide">
-          {labelConfig.fields.map((field: LabelField, index: number) => (
-            <motion.div
-              key={field.id}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: index * 0.1 }}
-              className="flex items-start gap-2 p-3 bg-secondary/30 rounded-lg border border-border/50 hover:border-primary/30 transition-colors group"
-            >
-              <div className="flex-1 space-y-2">
-                <div className="flex gap-2">
-                  <motion.div whileFocus={{ scale: 1.02 }} className="flex-1">
-                    <Input
-                      value={field.name}
-                      onChange={(e) =>
-                        updateField(field.id, { name: e.target.value })
-                      }
-                      className="h-8 text-xs"
-                      placeholder="Field name"
-                    />
-                  </motion.div>
-                  <motion.div whileFocus={{ scale: 1.02 }} className="flex-[2]">
-                    <Input
-                      value={field.value}
-                      onChange={(e) =>
-                        updateField(field.id, { value: e.target.value })
-                      }
-                      className="h-8 text-xs"
-                      placeholder="Value"
-                    />
-                  </motion.div>
-                </div>
-
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-1.5">
-                    <Label className="text-[10px]">Size</Label>
-                    <motion.div whileFocus={{ scale: 1.05 }}>
-                      <Input
-                        type="number"
-                        value={field.fontSize}
-                        onChange={(e) =>
-                          updateField(field.id, {
-                            fontSize: parseInt(e.target.value) || 12,
-                          })
-                        }
-                        className="h-7 w-14 text-xs"
-                      />
-                    </motion.div>
-                  </div>
-
-                  <div className="flex items-center gap-1.5">
-                    <Label className="text-[10px]">Bold</Label>
-                    <Switch
-                      checked={field.bold}
-                      onCheckedChange={(checked) =>
-                        updateField(field.id, { bold: checked })
-                      }
-                      className="scale-75"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                className="h-8 w-8 flex items-center justify-center text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
-                onClick={() => removeField(field.id)}
-              >
-                <Trash2 className="w-4 h-4" />
-              </motion.button>
-            </motion.div>
-          ))}
-        </div>
-
-        {labelConfig.fields.length === 0 && (
-          <div className="flex-1 flex items-center justify-center text-center p-4">
-            <div className="space-y-2">
-              <Sparkles className="w-8 h-8 text-primary/50 mx-auto" />
-              <p className="text-sm text-muted-foreground">
-                No fields yet. Click "Add Field" to create one.
-              </p>
-            </div>
-          </div>
-        )}
-      </motion.div>
     </div>
   );
 }

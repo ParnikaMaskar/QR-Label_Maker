@@ -8,7 +8,7 @@ import LabelInputPanel from "./LabelInputPanel";
 import LabelPreviewPanel from "./LabelPreviewPanel";
 import LabelStylePanel from "./LabelStylePanel";
 import { runAiMagicLayout, getLogoDimensions, getLogoRatio, validateContentFit, AIConfigOutput } from "@/lib/aiLayoutEngine";
-import { Sparkles, Check, ChevronDown, ListPlus, Palette, Printer, Type } from "lucide-react";
+import { Sparkles, Check, ChevronDown, ListPlus, Palette, Printer, Type, Download } from "lucide-react";
 
 /* ============================================================
    Types
@@ -286,6 +286,16 @@ export const LabelMaker = () => {
     },
   });
 
+  // Sync labelConfig.qrColor with styleConfig
+  useEffect(() => {
+    setStyleConfig((prev) => ({
+      ...prev,
+      dots: { ...prev.dots, color: labelConfig.qrColor },
+      cornersSquare: { ...prev.cornersSquare, color: labelConfig.qrColor },
+      cornersDot: { ...prev.cornersDot, color: labelConfig.qrColor },
+    }));
+  }, [labelConfig.qrColor]);
+
   /* ============================================================
      AI Layout Functions
   ============================================================ */
@@ -441,6 +451,11 @@ export const LabelMaker = () => {
   );
 
   /* ============================================================
+     Constants
+     ============================================================ */
+  const PX_PER_MM = 3.78; // 96 DPI standard
+
+  /* ============================================================
      Helpers
   ============================================================ */
 
@@ -525,9 +540,9 @@ export const LabelMaker = () => {
   ) => {
     const qrValue = getQrValue(rowData);
 
-    const labelWidthPx = printConfig.labelWidth * 3.78;
-    const labelHeightPx = printConfig.labelHeight * 3.78;
-    const maxQrSize = Math.min(labelWidthPx, labelHeightPx) * 0.7;
+    const labelWidthPx = (generationMode === "batch" ? printConfig.labelWidth : (labelConfig.labelWidth || 50)) * PX_PER_MM;
+    const labelHeightPx = (generationMode === "batch" ? printConfig.labelHeight : (labelConfig.labelHeight || 30)) * PX_PER_MM;
+    const maxQrSize = Math.min(labelWidthPx, labelHeightPx) * 0.75;
 
     // Use AI-derived qrSize if available, otherwise fall back to config
     const qrSize = labelConfig.autoSize
@@ -554,8 +569,10 @@ export const LabelMaker = () => {
           fontSize: `${field.fontSize}px`,
           fontWeight: field.bold ? 600 : 400,
           margin: 0,
-          lineHeight: 1.3,
+          lineHeight: 1.25,
           color: labelConfig.textColor || 'inherit',
+          wordBreak: 'break-word',
+          whiteSpace: 'normal',
         }}
       >
         <strong>{field.name}:</strong>{" "}
@@ -567,12 +584,14 @@ export const LabelMaker = () => {
 
     // Get layout class based on AI decision
     const layoutClass = labelConfig.layout === 'horizontal'
-      ? 'flex items-center gap-4'
+      ? 'flex items-center'
       : labelConfig.layout === 'vertical'
-        ? 'flex flex-col items-center gap-2 text-center'
+        ? 'flex flex-col items-center text-center'
         : labelConfig.layout === 'qr-only'
           ? 'flex justify-center'
-          : 'flex items-center gap-4';
+          : 'flex items-center';
+
+    const innerGap = `${gap}px`;
 
     switch (labelConfig.layout) {
       case "horizontal": {
@@ -584,15 +603,15 @@ export const LabelMaker = () => {
           <div className={layoutClass}>
             {/* QR/Logo Section - Left */}
             <div
-              className="flex-shrink-0 flex items-center justify-center"
-              style={{ width: `${leftWidth}%` }}
+              className="flex-shrink-0 flex items-center justify-center overflow-hidden"
+              style={{ width: `${leftWidth}%`, marginRight: innerGap }}
             >
               {qr}
             </div>
             {/* Text Section - Right */}
             <div
-              className="flex flex-col gap-1 overflow-hidden"
-              style={{ width: `${rightWidth}%` }}
+              className="flex flex-col overflow-hidden"
+              style={{ width: `${rightWidth}%`, gap: '2px' }}
             >
               {labelConfig.fields.map((field, idx) => renderField(field, idx))}
             </div>
@@ -603,7 +622,7 @@ export const LabelMaker = () => {
 
       case "vertical":
         content = (
-          <div className={layoutClass}>
+          <div className={layoutClass} style={{ gap: innerGap }}>
             {labelConfig.fields[0] &&
               renderField(labelConfig.fields[0], 0)}
             {labelConfig.fields[1] &&
@@ -622,9 +641,9 @@ export const LabelMaker = () => {
       case "address":
       case "2x4-label":
         content = (
-          <div className={layoutClass}>
+          <div className={layoutClass} style={{ gap: innerGap }}>
             {qr}
-            <div className="flex flex-col gap-0.5">
+            <div className="flex flex-col overflow-hidden" style={{ gap: '2px' }}>
               {labelConfig.fields.map((field, idx) => renderField(field, idx))}
             </div>
           </div>
@@ -633,11 +652,11 @@ export const LabelMaker = () => {
 
       case "product-tag":
         content = (
-          <div className={layoutClass}>
+          <div className={layoutClass} style={{ gap: innerGap }}>
             {labelConfig.fields[0] &&
               renderField(labelConfig.fields[0], 0)}
             {qr}
-            <div className="flex flex-col gap-0.5">
+            <div className="flex flex-col overflow-hidden" style={{ gap: '2px' }}>
               {labelConfig.fields.slice(1).map((field, idx) => renderField(field, idx + 1))}
             </div>
           </div>
@@ -645,18 +664,8 @@ export const LabelMaker = () => {
         break;
     }
 
-    const pxPerMm = 4.5;
-
-    const manualWidthPx =
-      !labelConfig.autoSize && labelConfig.labelWidth
-        ? labelConfig.labelWidth * pxPerMm
-        : undefined;
-
-    const manualHeightPx =
-      !labelConfig.autoSize && labelConfig.labelHeight
-        ? labelConfig.labelHeight * pxPerMm
-        : undefined;
-
+    const manualWidthPx = (generationMode === "batch" ? printConfig.labelWidth : (!labelConfig.autoSize ? labelConfig.labelWidth : undefined)) * PX_PER_MM;
+    const manualHeightPx = (generationMode === "batch" ? printConfig.labelHeight : (!labelConfig.autoSize ? labelConfig.labelHeight : undefined)) * PX_PER_MM;
 
     return (
       <div
@@ -666,6 +675,9 @@ export const LabelMaker = () => {
           padding: `${padding}px`,
           width: manualWidthPx ? `${manualWidthPx}px` : "fit-content",
           height: manualHeightPx ? `${manualHeightPx}px` : "fit-content",
+          minWidth: manualWidthPx ? `${manualWidthPx}px` : undefined,
+          minHeight: manualHeightPx ? `${manualHeightPx}px` : undefined,
+          boxSizing: 'border-box',
           overflow: "hidden",
           backgroundColor: labelConfig.qrBgColor,
         }}
@@ -718,8 +730,9 @@ export const LabelMaker = () => {
 
     const paper = paperSizes[printConfig.paperSize] || paperSizes.a4;
 
-    const labelWidthMm = printConfig.labelWidth || 50;
-    const labelHeightMm = printConfig.labelHeight || 30;
+    const isSingle = generationMode === "single";
+    const labelWidthMm = isSingle ? (labelConfig.labelWidth || 50) : (printConfig.labelWidth || 50);
+    const labelHeightMm = isSingle ? (labelConfig.labelHeight || 30) : (printConfig.labelHeight || 30);
 
     const labelWidthPx = labelWidthMm * 3.78;
     const labelHeightPx = labelHeightMm * 3.78;
@@ -731,6 +744,7 @@ export const LabelMaker = () => {
 
     const baseFontSize = labelConfig.baseFontSize || 14;
     const padding = labelConfig.padding || 12;
+    const gap = labelConfig.gap || 8;
     const textColor = labelConfig.textColor || '#000000';
 
     const generateLabelsWithQR = async () => {
@@ -763,10 +777,9 @@ export const LabelMaker = () => {
                 font-size: ${field.fontSize}px;
                 font-weight: ${field.bold ? 600 : 400};
                 margin: 0;
-                line-height: 1.3;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
+                line-height: 1.25;
+                white-space: normal;
+                word-break: break-word;
                 color: ${textColor};
               ">
                 <strong>${field.name}:</strong> ${value}
@@ -778,14 +791,14 @@ export const LabelMaker = () => {
 
           let contentHtml = "";
 
-          // Get layout class based on AI decision
+          // Get layout styles using the same logic as preview
           const layoutStyles = {
-            horizontal: 'display:flex;gap:4mm;align-items:center;',
-            vertical: 'display:flex;flex-direction:column;align-items:center;gap:2mm;text-align:center;',
+            horizontal: `display:flex;align-items:center;`,
+            vertical: `display:flex;flex-direction:column;align-items:center;text-align:center;gap:${gap}px;`,
             'qr-only': 'display:flex;justify-content:center;',
-            address: 'display:flex;gap:4mm;align-items:center;',
-            '2x4-label': 'display:flex;gap:4mm;align-items:center;',
-            'product-tag': 'display:flex;flex-direction:column;align-items:center;gap:2mm;',
+            address: `display:flex;align-items:center;gap:${gap}px;`,
+            '2x4-label': `display:flex;align-items:center;gap:${gap}px;`,
+            'product-tag': `display:flex;flex-direction:column;align-items:center;gap:${gap}px;`,
           };
 
           const layoutStyle = layoutStyles[labelConfig.layout as keyof typeof layoutStyles] || layoutStyles.horizontal;
@@ -795,8 +808,8 @@ export const LabelMaker = () => {
               // Get AI-derived width percentages for print layout
               const leftWidth = labelConfig.leftWidthPercent || 40;
               const rightWidth = labelConfig.rightWidthPercent || 60;
-              const leftWidthStyle = `width:${leftWidth}%;display:flex;align-items:center;justify-content:center;flex-shrink:0;`;
-              const rightWidthStyle = `width:${rightWidth}%;overflow:hidden;`;
+              const leftWidthStyle = `width:${leftWidth}%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-right:${gap}px;`;
+              const rightWidthStyle = `width:${rightWidth}%;overflow:hidden;display:flex;flex-direction:column;gap:2px;`;
               contentHtml = `<div style="${layoutStyle}"><div style="${leftWidthStyle}">${imgTag}</div><div style="${rightWidthStyle}">${fieldHtmls.join("")}</div></div>`;
               break;
             }
@@ -811,11 +824,11 @@ export const LabelMaker = () => {
 
             case "address":
             case "2x4-label":
-              contentHtml = `<div style="${layoutStyle}">${imgTag}<div style="overflow:hidden;">${fieldHtmls.join("")}</div></div>`;
+              contentHtml = `<div style="${layoutStyle}">${imgTag}<div style="overflow:hidden;display:flex;flex-direction:column;gap:2px;">${fieldHtmls.join("")}</div></div>`;
               break;
 
             case "product-tag":
-              contentHtml = `<div style="${layoutStyle}">${fieldHtmls[0] || ""}${imgTag}<div style="overflow:hidden;">${fieldHtmls.slice(1).join("")}</div></div>`;
+              contentHtml = `<div style="${layoutStyle}">${fieldHtmls[0] || ""}${imgTag}<div style="overflow:hidden;display:flex;flex-direction:column;gap:2px;">${fieldHtmls.slice(1).join("")}</div></div>`;
               break;
 
             default:
@@ -829,7 +842,7 @@ export const LabelMaker = () => {
                 border: ${labelConfig.borderWidth}px solid ${labelConfig.borderColor};
                 padding: ${padding}px;
                 border-radius: 8px;
-                background: white;
+                background: ${labelConfig.qrBgColor || '#ffffff'};
                 width: ${labelWidthMm}mm;
                 height: ${labelHeightMm}mm;
                 overflow: hidden;
@@ -847,9 +860,8 @@ export const LabelMaker = () => {
                     font-size:${baseFontSize}px;
                     margin:0 0 4px 0;
                     color: ${textColor};
-                    white-space: nowrap;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
+                    white-space: normal;
+                    word-break: break-word;
                   ">
                     ${labelConfig.heading}
                   </p>`
@@ -912,9 +924,8 @@ export const LabelMaker = () => {
                 top: ${printConfig.marginTop}mm;
                 left: ${printConfig.marginLeft}mm;
                 display: grid;
-                grid-template-columns: repeat(${printConfig.labelsPerRow}, ${labelWidthMm}mm);
+                grid-template-columns: repeat(${isSingle ? 1 : printConfig.labelsPerRow}, ${labelWidthMm}mm);
                 gap: ${printConfig.gapVertical}mm ${printConfig.gapHorizontal}mm;
-                padding: 10mm;
               }
 
               .label {
@@ -1182,35 +1193,63 @@ export const LabelMaker = () => {
               setStyleConfig={setStyleConfig}
               layoutPresets={layoutPresets}
               setAutoPreviewSize={setAutoPreviewSize}
+              generationMode={generationMode}
             />
-            <div className="pt-4 flex justify-end">
-              <button
-                onClick={() => advanceToStep(4)}
-                className="px-6 py-2 rounded-lg font-medium transition-colors bg-primary text-white hover:bg-primary/90"
-              >
-                Next: Print Options
-              </button>
-            </div>
+            {/* Single mode: Print CTA inline. Batch mode: advance to step 4 */}
+            {generationMode === "single" ? (
+              <div className="pt-4 border-t border-border/50">
+                <p className="text-xs text-muted-foreground mb-3 text-center">
+                  Your label is ready — print or export from the preview panel →
+                </p>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    onClick={handlePrint}
+                    className="flex items-center justify-center gap-2 py-3 rounded-xl bg-white border-2 border-border hover:border-primary/50 font-semibold text-sm transition-all"
+                  >
+                    <Download className="w-4 h-4" />
+                    Export PDF
+                  </button>
+                  <button
+                    onClick={handlePrint}
+                    className="flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-r from-primary to-accent text-white shadow-lg hover:shadow-xl font-semibold text-sm transition-all"
+                  >
+                    <Printer className="w-4 h-4" />
+                    Print Label
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="pt-4 flex justify-end">
+                <button
+                  onClick={() => advanceToStep(4)}
+                  className="px-6 py-2 rounded-lg font-medium transition-colors bg-primary text-white hover:bg-primary/90"
+                >
+                  Next: Print Options
+                </button>
+              </div>
+            )}
           </div>
         </AccordionStep>
 
-        {/* STEP 4: PRINT OPTIONS */}
-        <AccordionStep
-          stepNum={4}
-          title="Print Options"
-          subtitle={`${printConfig.labelWidth}mm x ${printConfig.labelHeight}mm`}
-          isActive={activeStep === 4}
-          isCompleted={completedSteps.includes(4)}
-          onClick={() => setActiveStep(4)}
-        >
-          <div className="pt-2">
-            <PrintSettings
-              config={printConfig}
-              onChange={setPrintConfig}
-              onManualResize={() => setAutoPreviewSize(false)}
-            />
-          </div>
-        </AccordionStep>
+        {/* STEP 4: PRINT OPTIONS — batch only */}
+        {generationMode === "batch" && (
+          <AccordionStep
+            stepNum={4}
+            title="Print Options"
+            subtitle={`${printConfig.labelWidth}mm × ${printConfig.labelHeight}mm · ${printConfig.labelsPerRow}/row`}
+            isActive={activeStep === 4}
+            isCompleted={completedSteps.includes(4)}
+            onClick={() => setActiveStep(4)}
+          >
+            <div className="pt-2">
+              <PrintSettings
+                config={printConfig}
+                onChange={setPrintConfig}
+                onManualResize={() => setAutoPreviewSize(false)}
+              />
+            </div>
+          </AccordionStep>
+        )}
       </div>
 
       {/* RIGHT COLUMN: STICKY PREVIEW */}
@@ -1222,10 +1261,14 @@ export const LabelMaker = () => {
           setShowStyleSettings={() => { }}
           renderSingleLabel={renderSingleLabel}
           handlePrint={handlePrint}
+          handleDownloadPdf={handlePrint}
           labelConfig={labelConfig}
           setLabelConfig={setLabelConfig}
           styleConfig={styleConfig}
           setStyleConfig={setStyleConfig}
+          printConfig={printConfig}
+          generationMode={generationMode}
+          forceSinglePreview={generationMode === "batch" && activeStep < 4}
         />
         <div className="mt-4 p-4 bg-gradient-to-r from-primary/5 via-accent/5 to-primary/5 rounded-xl border border-primary/10">
           <div className="flex items-start gap-3">

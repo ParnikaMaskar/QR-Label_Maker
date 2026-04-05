@@ -66,7 +66,8 @@ type Props = {
     { name: string; description: string }
   >;
 
-  setAutoPreviewSize: (v: boolean) => void;   // ✅ important
+  setAutoPreviewSize: (v: boolean) => void;
+  generationMode?: "single" | "batch";
 };
 
 export default function LabelStylePanel({
@@ -83,6 +84,7 @@ export default function LabelStylePanel({
   setStyleConfig,
   layoutPresets,
   setAutoPreviewSize,
+  generationMode = "single",
 }: Props) {
   const [selectedCategory, setSelectedCategory] = useState<CategoryFilter>("all");
   const [scrollContainer, setScrollContainer] = useState<HTMLDivElement | null>(null);
@@ -193,11 +195,12 @@ export default function LabelStylePanel({
           </div>
         </section>
 
-        {/* DIMENSIONS & STYLING SECTION */}
+        {/* DIMENSIONS & STYLING SECTION — single mode only (batch uses Step 4) */}
+        {generationMode === "single" && (
         <section>
           <div className="flex items-center gap-2 mb-3 border-b pb-2">
             <Palette className="w-4 h-4 text-primary" />
-            <h3 className="font-semibold text-sm">Dimensions & Styling</h3>
+            <h3 className="font-semibold text-sm">Dimensions &amp; Styling</h3>
           </div>
           <div className="space-y-4">
             <div className="flex items-center justify-between">
@@ -263,9 +266,9 @@ export default function LabelStylePanel({
                     type="color"
                     className="w-8 h-8 rounded cursor-pointer"
                     value={labelConfig.qrColor}
-                    onChange={(e) =>
+                    onChange={(e) => {
                       setLabelConfig((prev: any) => ({ ...prev, qrColor: e.target.value }))
-                    }
+                    }}
                   />
                   <span className="text-xs uppercase">{labelConfig.qrColor}</span>
                 </div>
@@ -273,6 +276,7 @@ export default function LabelStylePanel({
             </div>
           </div>
         </section>
+        )}
 
         {/* QR CONFIG SECTION */}
         <section>

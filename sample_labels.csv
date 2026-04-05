@@ -1,0 +1,5 @@
+Title,Subtitle,Footer
+Product A,This is a very long description that should wrap to multiple lines in the label preview and print output.,A-001
+Product B,Short description,B-002
+Product C,Another long description that will surely test the wrapping capabilities of our new layout engine. It's quite long don't you think?,C-003
+Product D,Simple,D-004

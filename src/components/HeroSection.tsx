@@ -125,35 +125,35 @@ export const HeroSection = () => {
           >
             {/* Decorative Background */}
             <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-accent/20 rounded-3xl blur-2xl" />
-            
+
             {/* Main Card */}
             <div className="relative card-modern p-8 mx-auto max-w-md">
               {/* QR Code Placeholder */}
 
               {/* QR Preview with reveal effect */}
-<motion.div
-  initial="initial"
-  whileHover="hover"
-  className="relative aspect-square rounded-xl overflow-hidden bg-white border border-border/40 mb-6"
->
-  <img
-    src="public/qr-base.png"
-    className="absolute inset-0 w-full h-full object-cover"
-  />
+              <motion.div
+                initial="initial"
+                whileHover="hover"
+                className="relative aspect-square rounded-xl overflow-hidden bg-white border border-border/40 mb-6"
+              >
+                <img
+                  src="qr-base.png"
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
 
-  <motion.img
-    src="public/qe-new.png"
-    variants={{
-      initial: { clipPath: "inset(0 100% 0 0)" },
-      hover: { clipPath: "inset(0 0% 0 0)" }
-    }}
-    transition={{
-      duration: 0.7,
-      ease: [0.22, 1, 0.36, 1]
-    }}
-    className="absolute inset-0 w-full h-full object-cover pointer-events-none"
-  />
-</motion.div>
+                <motion.img
+                  src="qe-new.png"
+                  variants={{
+                    initial: { clipPath: "inset(0 100% 0 0)" },
+                    hover: { clipPath: "inset(0 0% 0 0)" }
+                  }}
+                  transition={{
+                    duration: 0.7,
+                    ease: [0.22, 1, 0.36, 1]
+                  }}
+                  className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+                />
+              </motion.div>
 
 
               {/* Stats */}

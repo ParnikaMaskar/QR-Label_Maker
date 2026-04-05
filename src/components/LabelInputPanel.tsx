@@ -321,6 +321,37 @@ export default function LabelInputPanel({
         )}
       </motion.div>
 
+      {/* ===== Global Label Heading (Batch) ===== */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.05 }}
+        className="glass-card p-4 rounded-xl space-y-4"
+      >
+        <div className="flex items-center gap-2 border-b pb-3">
+          <Type className="w-4 h-4 text-primary" />
+          <h3 className="font-bold text-sm text-foreground">Global Header</h3>
+        </div>
+        
+        <div className="space-y-1.5">
+          <Label className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground">Label Heading</Label>
+          <Input
+            value={labelConfig.heading}
+            onChange={(e) =>
+              setLabelConfig((p: LabelConfig) => ({
+                ...p,
+                heading: e.target.value,
+              }))
+            }
+            placeholder="e.g. DEVICE LABEL, PROPERTY OF..., QR TAG"
+            className="input-float h-10 font-semibold"
+          />
+          <p className="text-[10px] text-muted-foreground italic">
+            This text appears at the top of every label in your batch.
+          </p>
+        </div>
+      </motion.div>
+
       {/* ===== Row: Data + Logo ===== */}
       <div className={`grid grid-cols-1 md:grid-cols-2 gap-4`}>
         {/* Data Source - Glass Card */}

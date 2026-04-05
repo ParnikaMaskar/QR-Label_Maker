@@ -3,7 +3,6 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import ScanGoEntry from "./components/ScanGoEntry";
 import Index from "./pages/Index";
 import QRMakerPage from "./pages/QRMakerPage";
 import LabelMakerPage from "./pages/LabelMakerPage";
@@ -17,7 +16,7 @@ const AppRoutes = () => {
   return (
     <>
       <Routes>
-        <Route path="/" element={<ScanGoEntry />} />
+        <Route path="/" element={<Index />} />
         <Route path="/dashboard" element={<Index />} />
         <Route path="/qr-maker" element={<QRMakerPage />} />
         <Route path="/label-maker" element={<LabelMakerPage />} />

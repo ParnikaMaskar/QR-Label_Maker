@@ -195,16 +195,18 @@ export default function LabelStylePanel({
           </div>
         </section>
 
-        {/* DIMENSIONS & STYLING SECTION — single mode only (batch uses Step 4) */}
-        {generationMode === "single" && (
+        {/* STYLE & BORDERS SECTION */}
         <section>
           <div className="flex items-center gap-2 mb-3 border-b pb-2">
             <Palette className="w-4 h-4 text-primary" />
-            <h3 className="font-semibold text-sm">Dimensions &amp; Styling</h3>
+            <h3 className="font-semibold text-sm">Style &amp; Borders</h3>
           </div>
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <Label className="text-sm font-medium">Auto Size Label</Label>
+              <div>
+                <Label className="text-sm font-medium">Auto Size Label</Label>
+                <p className="text-[10px] text-muted-foreground italic">Optimize layout automatically</p>
+              </div>
               <Switch
                 checked={labelConfig.autoSize}
                 onCheckedChange={(checked) =>
@@ -217,35 +219,39 @@ export default function LabelStylePanel({
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label className="text-xs text-muted-foreground">Width (mm)</Label>
-                <Slider
-                  disabled={labelConfig.autoSize}
-                  value={[labelConfig.labelWidth || 50]}
-                  min={20}
-                  max={150}
-                  step={1}
-                  onValueChange={([v]) =>
-                    setLabelConfig((prev: any) => ({ ...prev, labelWidth: v }))
-                  }
-                />
+            {/* Manual Dimensions - Single Mode Only */}
+            {generationMode === "single" && (
+              <div className="grid grid-cols-2 gap-4 animate-in fade-in duration-300">
+                <div className="space-y-2">
+                  <Label className="text-xs text-muted-foreground">Width (mm)</Label>
+                  <Slider
+                    disabled={labelConfig.autoSize}
+                    value={[labelConfig.labelWidth || 50]}
+                    min={20}
+                    max={150}
+                    step={1}
+                    onValueChange={([v]) =>
+                      setLabelConfig((prev: any) => ({ ...prev, labelWidth: v }))
+                    }
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs text-muted-foreground">Height (mm)</Label>
+                  <Slider
+                    disabled={labelConfig.autoSize}
+                    value={[labelConfig.labelHeight || 30]}
+                    min={15}
+                    max={100}
+                    step={1}
+                    onValueChange={([v]) =>
+                      setLabelConfig((prev: any) => ({ ...prev, labelHeight: v }))
+                    }
+                  />
+                </div>
               </div>
-              <div className="space-y-2">
-                <Label className="text-xs text-muted-foreground">Height (mm)</Label>
-                <Slider
-                  disabled={labelConfig.autoSize}
-                  value={[labelConfig.labelHeight || 30]}
-                  min={15}
-                  max={100}
-                  step={1}
-                  onValueChange={([v]) =>
-                    setLabelConfig((prev: any) => ({ ...prev, labelHeight: v }))
-                  }
-                />
-              </div>
-            </div>
+            )}
 
+            {/* Style Controls - Always Visible */}
             <div className="grid grid-cols-2 gap-4 pt-2">
               <div className="space-y-2">
                 <Label className="text-xs text-muted-foreground">Border Width</Label>
@@ -264,19 +270,18 @@ export default function LabelStylePanel({
                 <div className="flex items-center gap-2">
                   <input
                     type="color"
-                    className="w-8 h-8 rounded cursor-pointer"
+                    className="w-8 h-8 rounded cursor-pointer transition-transform hover:scale-110"
                     value={labelConfig.qrColor}
                     onChange={(e) => {
                       setLabelConfig((prev: any) => ({ ...prev, qrColor: e.target.value }))
                     }}
                   />
-                  <span className="text-xs uppercase">{labelConfig.qrColor}</span>
+                  <span className="text-[10px] font-mono uppercase">{labelConfig.qrColor}</span>
                 </div>
               </div>
             </div>
           </div>
         </section>
-        )}
 
         {/* QR CONFIG SECTION */}
         <section>
